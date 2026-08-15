@@ -1,0 +1,6 @@
+{
+  "name": "Shyamali | CareFrame Studios",
+  "description": "Dynamic ambient landing page featuring day/night background video transitions, Indian Standard Time, real-time live visitors counter, and YouTube playlist glassmorphism music player.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
