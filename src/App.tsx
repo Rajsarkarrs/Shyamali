@@ -143,8 +143,8 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between p-3 sm:p-6 md:p-8 font-sans overflow-x-hidden antialiased select-none text-white">
-      {/* Dynamic Background Video (Day/Night 6AM-6PM IST or Toggle) */}
-      <BackgroundVideo timeOfDay={effectiveTimeOfDay} />
+      {/* Dynamic Background Video (Day/Night 6AM-6PM IST or Toggle per Playlist) */}
+      <BackgroundVideo timeOfDay={effectiveTimeOfDay} categoryId={currentCategory.id} />
 
       {/* Hidden YouTube & Audio Engine (No video frame rendered) */}
       <YouTubeAudioPlayer
@@ -179,11 +179,11 @@ export default function App() {
           <button
             id="iti-glass-trigger-btn"
             onClick={() => setIsItiModalOpen(true)}
-            className="w-7 h-7 sm:w-11 sm:h-11 rounded-full backdrop-blur-md bg-black/35 hover:bg-black/55 border border-white/20 hover:border-yellow-400/70 shadow-lg flex items-center justify-center text-yellow-300 font-bengali-handwritten text-base sm:text-2xl transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
+            className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl sm:rounded-2xl backdrop-blur-md bg-black/35 hover:bg-black/55 border border-white/20 hover:border-yellow-400/70 shadow-lg flex items-center justify-center text-yellow-300 font-bengali-handwritten text-sm sm:text-lg transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
             title="ইতি - Credits & Notes"
             aria-label="ইতি"
           >
-            <span className="drop-shadow-[0_2px_8px_rgba(253,224,71,0.5)] group-hover:scale-110 transition-transform duration-300">
+            <span className="drop-shadow-[0_2px_8px_rgba(253,224,71,0.5)] group-hover:scale-105 transition-transform duration-300">
               ইতি
             </span>
           </button>
@@ -224,7 +224,7 @@ export default function App() {
                   textShadow: '0 2px 8px rgba(0,0,0,0.9)',
                 }}
               >
-                {currentCategory.nameBengali} Playlist
+                {currentCategory.nameBengali}
               </motion.p>
             </AnimatePresence>
           </div>

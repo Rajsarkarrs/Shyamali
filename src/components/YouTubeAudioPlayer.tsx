@@ -133,6 +133,11 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
             onReady: (event: any) => {
               isPlayerReadyRef.current = true;
               event.target.setVolume(isMuted ? 0 : volume);
+              if (isMuted && typeof event.target.mute === 'function') {
+                event.target.mute();
+              } else if (!isMuted && typeof event.target.unMute === 'function') {
+                event.target.unMute();
+              }
               if (isPlaying) {
                 event.target.playVideo();
                 startTimeLoop();
@@ -265,12 +270,18 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   useEffect(() => {
     if (audioFallbackRef.current) {
       audioFallbackRef.current.volume = isMuted ? 0 : volume / 100;
+      audioFallbackRef.current.muted = isMuted;
     }
 
     if (playerRef.current && isPlayerReadyRef.current) {
       try {
         if (typeof playerRef.current.setVolume === 'function') {
           playerRef.current.setVolume(isMuted ? 0 : volume);
+        }
+        if (isMuted && typeof playerRef.current.mute === 'function') {
+          playerRef.current.mute();
+        } else if (!isMuted && typeof playerRef.current.unMute === 'function') {
+          playerRef.current.unMute();
         }
       } catch {
         // Ignore

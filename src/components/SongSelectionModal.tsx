@@ -65,7 +65,7 @@ export const SongSelectionModal: React.FC<SongSelectionModalProps> = React.memo(
                 <h2 className="text-xs sm:text-sm font-bold tracking-[0.15em] sm:tracking-[0.2em] text-stone-200 uppercase font-sans">
                   Playlists
                 </h2>
-                <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-stone-800/80 text-amber-300 border border-stone-700">
+                <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-md bg-stone-800/80 text-amber-300 border border-stone-700">
                   {playlist.tracks.length} Songs
                 </span>
               </div>
@@ -73,7 +73,7 @@ export const SongSelectionModal: React.FC<SongSelectionModalProps> = React.memo(
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+                className="p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
                 title="Close"
               >
                 <X className="w-4 h-4 pointer-events-none" />

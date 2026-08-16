@@ -8,20 +8,43 @@ const PORT = 3000;
 // Set up JSON body parser
 app.use(express.json());
 
-// Real-time SSE Live Visitor Tracking
-interface VisitorClient {
+// Real-time SSE & Ping Live Visitor Tracking
+interface SSEClient {
   id: string;
   res: express.Response;
 }
 
-let clients: VisitorClient[] = [];
+const activeSessions = new Map<string, number>(); // sessionId -> lastSeen timestamp
+const visitedSessionIds = new Set<string>();
+let sseClients: SSEClient[] = [];
 let totalVisits = 108; // Starting base visit count
 
-function broadcastVisitorCount() {
-  const activeCount = clients.length;
-  const data = JSON.stringify({ activeCount, totalVisits });
-  
-  clients = clients.filter((client) => {
+function cleanStaleSessions(): boolean {
+  const now = Date.now();
+  const timeout = 10000; // 10 seconds timeout for inactive sessions
+  let removed = false;
+  for (const [sessionId, lastSeen] of activeSessions.entries()) {
+    if (now - lastSeen > timeout) {
+      activeSessions.delete(sessionId);
+      removed = true;
+    }
+  }
+  return removed;
+}
+
+function getActiveStats() {
+  cleanStaleSessions();
+  return {
+    activeCount: Math.max(1, activeSessions.size),
+    totalVisits,
+  };
+}
+
+function broadcastVisitorStats() {
+  const stats = getActiveStats();
+  const data = JSON.stringify(stats);
+
+  sseClients = sseClients.filter((client) => {
     try {
       client.res.write(`data: ${data}\n\n`);
       return true;
@@ -31,12 +54,42 @@ function broadcastVisitorCount() {
   });
 }
 
-// REST endpoint for initial fallback
+// Periodically clean stale sessions and broadcast if count changed
+setInterval(() => {
+  if (cleanStaleSessions()) {
+    broadcastVisitorStats();
+  }
+}, 4000);
+
+// Ping endpoint for active session pulse
+app.post("/api/visitors/ping", (req, res) => {
+  const { sessionId } = req.body || {};
+  if (sessionId && typeof sessionId === "string") {
+    if (!visitedSessionIds.has(sessionId)) {
+      visitedSessionIds.add(sessionId);
+      totalVisits++;
+    }
+    activeSessions.set(sessionId, Date.now());
+  }
+  const stats = getActiveStats();
+  broadcastVisitorStats();
+  res.json(stats);
+});
+
+// Leave endpoint when user closes tab
+app.post("/api/visitors/leave", (req, res) => {
+  const { sessionId } = req.body || {};
+  if (sessionId && typeof sessionId === "string") {
+    activeSessions.delete(sessionId);
+  }
+  const stats = getActiveStats();
+  broadcastVisitorStats();
+  res.json({ ok: true });
+});
+
+// REST endpoint for initial / fallback count
 app.get("/api/visitors/count", (_req, res) => {
-  res.json({
-    activeCount: clients.length,
-    totalVisits,
-  });
+  res.json(getActiveStats());
 });
 
 // SSE endpoint for real-time live visitor updates
@@ -51,12 +104,12 @@ app.get("/api/visitors/stream", (req, res) => {
     "X-Accel-Buffering": "no",
   });
 
-  totalVisits++;
-  const client: VisitorClient = { id: clientId, res };
-  clients.push(client);
+  const client: SSEClient = { id: clientId, res };
+  sseClients.push(client);
 
-  // Broadcast updated count to all connected clients immediately
-  broadcastVisitorCount();
+  // Send initial data immediately
+  const stats = getActiveStats();
+  res.write(`data: ${JSON.stringify(stats)}\n\n`);
 
   // Heartbeat ping every 15s to keep connection alive across proxies
   const heartbeatInterval = setInterval(() => {
@@ -69,14 +122,9 @@ app.get("/api/visitors/stream", (req, res) => {
 
   const cleanup = () => {
     clearInterval(heartbeatInterval);
-    const initialLength = clients.length;
-    clients = clients.filter((c) => c.id !== clientId);
-    if (clients.length !== initialLength) {
-      broadcastVisitorCount();
-    }
+    sseClients = sseClients.filter((c) => c.id !== clientId);
   };
 
-  // Remove client on disconnect or error
   req.on("close", cleanup);
   req.on("end", cleanup);
   req.on("error", cleanup);

@@ -3,14 +3,29 @@ import { TimeOfDay } from '../types';
 
 interface BackgroundVideoProps {
   timeOfDay: TimeOfDay;
+  categoryId?: string;
 }
 
-const DAY_VIDEO_URL = 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00003.mp4?updatedAt=1786807598064';
-const NIGHT_VIDEO_URL = 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00002.mp4?updatedAt=1786807598943';
+export const PLAYLIST_BACKGROUNDS: Record<string, { day: string; night: string }> = {
+  puja: {
+    day: 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00003.mp4?updatedAt=1786807598064',
+    night: 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00002.mp4?updatedAt=1786807598943',
+  },
+  swadeshi: {
+    day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786844742/CFS_Vid_00004_uh4noi.mp4',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786844740/CFS_Vid_00005_dqtaxn.mp4',
+  },
+};
 
-export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ timeOfDay }) => {
+const DEFAULT_BACKGROUNDS = PLAYLIST_BACKGROUNDS.puja;
+
+export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ timeOfDay, categoryId = 'puja' }) => {
   const dayVideoRef = useRef<HTMLVideoElement | null>(null);
   const nightVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const bgConfig = PLAYLIST_BACKGROUNDS[categoryId] || DEFAULT_BACKGROUNDS;
+  const dayUrl = bgConfig.day;
+  const nightUrl = bgConfig.night;
 
   // Manage playback to conserve battery/GPU resources on mobile devices
   useEffect(() => {
@@ -28,7 +43,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ tim
       }, 1200);
       return () => clearTimeout(timer);
     }
-  }, [timeOfDay]);
+  }, [timeOfDay, dayUrl, nightUrl]);
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20 bg-slate-950 translate-z-0">
@@ -49,6 +64,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ tim
         style={{ transform: 'translate3d(0, 0, 0)' }}
       >
         <video
+          key={`day-${dayUrl}`}
           ref={dayVideoRef}
           autoPlay
           loop
@@ -57,7 +73,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ tim
           preload="auto"
           className="w-full h-full object-cover select-none scale-105"
         >
-          <source src={DAY_VIDEO_URL} type="video/mp4" />
+          <source src={dayUrl} type="video/mp4" />
         </video>
       </div>
 
@@ -69,6 +85,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ tim
         style={{ transform: 'translate3d(0, 0, 0)' }}
       >
         <video
+          key={`night-${nightUrl}`}
           ref={nightVideoRef}
           autoPlay
           loop
@@ -77,7 +94,7 @@ export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ tim
           preload="auto"
           className="w-full h-full object-cover select-none scale-105"
         >
-          <source src={NIGHT_VIDEO_URL} type="video/mp4" />
+          <source src={nightUrl} type="video/mp4" />
         </video>
       </div>
 

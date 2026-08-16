@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Play,
   Pause,
@@ -59,7 +60,34 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
 }) => {
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState(false);
   const [isSongModalOpen, setIsSongModalOpen] = useState(false);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [isMobileVolumeOpen, setIsMobileVolumeOpen] = useState(false);
+  const [isDesktopVolumeOpen, setIsDesktopVolumeOpen] = useState(false);
+
+  const mobileVolumeRef = useRef<HTMLDivElement>(null);
+  const desktopVolumeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileVolumeRef.current &&
+        !mobileVolumeRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileVolumeOpen(false);
+      }
+      if (
+        desktopVolumeRef.current &&
+        !desktopVolumeRef.current.contains(event.target as Node)
+      ) {
+        setIsDesktopVolumeOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   const progressPercent =
     playerState.duration > 0
@@ -75,7 +103,7 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
           id="playlist-category-btn"
           onClick={() => setIsPlaylistMenuOpen((prev) => !prev)}
           title="Browse All Playlist Categories"
-          className="backdrop-blur-md bg-black/40 hover:bg-black/60 border border-white/20 hover:border-amber-400/50 rounded-full px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-100 shadow-lg flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 group"
+          className="backdrop-blur-md bg-black/40 hover:bg-black/60 border border-white/20 hover:border-amber-400/50 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-100 shadow-lg flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 group"
         >
           <ListFilter className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
           <span>Playlist</span>
@@ -87,7 +115,7 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
           id="selected-playlist-songs-btn"
           onClick={() => setIsSongModalOpen(true)}
           title="Select Songs from this Playlist"
-          className="backdrop-blur-md bg-black/40 hover:bg-black/60 border border-white/20 hover:border-amber-400/50 rounded-full px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-200 shadow-lg flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 group"
+          className="backdrop-blur-md bg-black/40 hover:bg-black/60 border border-white/20 hover:border-amber-400/50 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-200 shadow-lg flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 group"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
           <span className="truncate max-w-[130px] sm:max-w-[220px]">
@@ -122,11 +150,11 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
       {/* MAIN AUDIO PLAYER CARD */}
       <div
         id="audio-player-card"
-        className="w-full backdrop-blur-xl bg-black/45 border border-white/20 rounded-2xl sm:rounded-[34px] p-2.5 sm:p-4 text-white shadow-2xl shadow-black/80 relative overflow-hidden transition-all duration-300"
+        className="w-full backdrop-blur-xl bg-black/45 border border-white/20 rounded-2xl sm:rounded-[34px] p-2.5 sm:p-4 text-white shadow-2xl shadow-black/80 relative transition-all duration-300"
       >
         {/* Subtle Ambient Background Warmth Glow without heavy blur filter */}
         <div
-          className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-transparent to-orange-500/5 pointer-events-none -z-10"
+          className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-transparent to-orange-500/5 pointer-events-none -z-10 rounded-2xl sm:rounded-[34px] overflow-hidden"
         />
 
         {/* MOBILE LAYOUT (< sm screens) */}
@@ -161,18 +189,70 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
               </p>
             </div>
 
-            {/* Quick Mute / Volume */}
-            <button
-              onClick={onToggleMute}
-              title={playerState.isMuted ? 'Unmute' : 'Mute'}
-              className="p-1.5 rounded-lg text-stone-400 hover:text-white bg-stone-800/40 border border-stone-700/50 shrink-0 active:scale-95"
-            >
-              {playerState.isMuted || playerState.volume === 0 ? (
-                <VolumeX className="w-3.5 h-3.5 text-rose-400" />
-              ) : (
-                <Volume2 className="w-3.5 h-3.5 text-stone-300" />
-              )}
-            </button>
+            {/* Mobile Volume Control Toggle & Popover Lever */}
+            <div className="relative shrink-0" ref={mobileVolumeRef}>
+              <button
+                onClick={() => setIsMobileVolumeOpen((prev) => !prev)}
+                title={playerState.isMuted ? 'Unmute' : 'Volume'}
+                className={`p-1.5 sm:p-2 rounded-xl border backdrop-blur-md transition-all active:scale-95 flex items-center justify-center ${
+                  isMobileVolumeOpen
+                    ? 'bg-stone-800 text-amber-300 border-amber-400/60 shadow-lg'
+                    : 'bg-black/40 text-stone-300 hover:text-white border-white/15'
+                }`}
+              >
+                {playerState.isMuted || playerState.volume === 0 ? (
+                  <VolumeX className="w-4 h-4 text-rose-400" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-amber-300" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isMobileVolumeOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: -6 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-2 z-[100] px-2.5 py-3 rounded-2xl bg-stone-900/95 border border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex flex-col items-center gap-2.5 w-12"
+                  >
+                    {/* Top: Percentage Badge */}
+                    <span className="text-[11px] font-mono text-amber-300 font-bold select-none leading-none">
+                      {playerState.isMuted ? '0%' : `${playerState.volume}%`}
+                    </span>
+
+                    {/* Middle: Vertical Volume Slider */}
+                    <div className="relative h-24 w-6 flex items-center justify-center">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={playerState.isMuted ? 0 : playerState.volume}
+                        onChange={(e) => onVolumeChange(parseInt(e.target.value, 10))}
+                        onInput={(e) => onVolumeChange(parseInt((e.target as HTMLInputElement).value, 10))}
+                        style={{
+                          background: `linear-gradient(to right, #f59e0b ${playerState.isMuted ? 0 : playerState.volume}%, #44403c ${playerState.isMuted ? 0 : playerState.volume}%)`,
+                        }}
+                        className="w-24 h-1.5 rounded-full appearance-none cursor-pointer accent-amber-400 focus:outline-none -rotate-90 origin-center shadow-inner"
+                      />
+                    </div>
+
+                    {/* Bottom: Quick Mute Button */}
+                    <button
+                      onClick={onToggleMute}
+                      title={playerState.isMuted ? 'Unmute' : 'Mute'}
+                      className="p-1 rounded-lg text-stone-300 hover:text-white transition-colors active:scale-95 shrink-0"
+                    >
+                      {playerState.isMuted || playerState.volume === 0 ? (
+                        <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                      ) : (
+                        <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+                      )}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Progress Slider Track + Timestamps */}
@@ -364,37 +444,69 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
               <Repeat className="w-4 h-4" />
             </button>
 
-            {/* Small volume toggle icon */}
-            <div className="relative">
+            {/* Desktop Volume Control Button & Floating Popover Lever */}
+            <div className="relative shrink-0" ref={desktopVolumeRef}>
               <button
-                onClick={onToggleMute}
-                onMouseEnter={() => setShowVolumeSlider(true)}
-                title={playerState.isMuted ? 'Unmute' : 'Mute'}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800/60 transition-all"
+                onClick={() => setIsDesktopVolumeOpen((prev) => !prev)}
+                title="Volume"
+                className={`p-2 rounded-xl border backdrop-blur-md transition-all active:scale-95 flex items-center justify-center ${
+                  isDesktopVolumeOpen
+                    ? 'bg-stone-800 text-amber-300 border-amber-400/60 shadow-lg'
+                    : 'bg-black/40 text-stone-300 hover:text-white border-white/15'
+                }`}
               >
                 {playerState.isMuted || playerState.volume === 0 ? (
-                  <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                  <VolumeX className="w-4 h-4 text-rose-400" />
                 ) : (
-                  <Volume2 className="w-3.5 h-3.5" />
+                  <Volume2 className="w-4 h-4 text-amber-300" />
                 )}
               </button>
 
-              {/* Volume Slider flyout */}
-              {showVolumeSlider && (
-                <div
-                  onMouseLeave={() => setShowVolumeSlider(false)}
-                  className="absolute bottom-full right-0 mb-2 p-2 bg-stone-900/95 border border-stone-700 rounded-xl shadow-xl z-50 flex items-center w-24"
-                >
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={playerState.isMuted ? 0 : playerState.volume}
-                    onChange={(e) => onVolumeChange(parseInt(e.target.value, 10))}
-                    className="w-full h-1 bg-stone-700 rounded-lg appearance-none cursor-pointer accent-amber-400"
-                  />
-                </div>
-              )}
+              <AnimatePresence>
+                {isDesktopVolumeOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-[100] px-2.5 py-3 rounded-2xl bg-stone-900/95 border border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex flex-col items-center gap-2.5 w-12"
+                  >
+                    {/* Top: Percentage Badge */}
+                    <span className="text-[11px] font-mono text-amber-300 font-bold select-none leading-none">
+                      {playerState.isMuted ? '0%' : `${playerState.volume}%`}
+                    </span>
+
+                    {/* Middle: Vertical Volume Slider */}
+                    <div className="relative h-24 w-6 flex items-center justify-center">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={playerState.isMuted ? 0 : playerState.volume}
+                        onChange={(e) => onVolumeChange(parseInt(e.target.value, 10))}
+                        onInput={(e) => onVolumeChange(parseInt((e.target as HTMLInputElement).value, 10))}
+                        style={{
+                          background: `linear-gradient(to right, #f59e0b ${playerState.isMuted ? 0 : playerState.volume}%, #44403c ${playerState.isMuted ? 0 : playerState.volume}%)`,
+                        }}
+                        className="w-24 h-1.5 rounded-full appearance-none cursor-pointer accent-amber-400 focus:outline-none -rotate-90 origin-center shadow-inner"
+                      />
+                    </div>
+
+                    {/* Bottom: Quick Mute Button */}
+                    <button
+                      onClick={onToggleMute}
+                      title={playerState.isMuted ? 'Unmute' : 'Mute'}
+                      className="p-1 rounded-lg text-stone-300 hover:text-white transition-colors active:scale-95 shrink-0"
+                    >
+                      {playerState.isMuted || playerState.volume === 0 ? (
+                        <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                      ) : (
+                        <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+                      )}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

@@ -55,7 +55,7 @@ export const ItiModal: React.FC<ItiModalProps> = React.memo(({ isOpen, onClose }
                 e.stopPropagation();
                 onClose();
               }}
-              className="absolute top-2.5 right-2.5 sm:top-5 sm:right-5 z-30 p-1.5 sm:p-2.5 rounded-full text-stone-300 hover:text-white bg-stone-900/80 hover:bg-stone-800 border border-stone-600/70 hover:border-stone-400 transition-all duration-200 cursor-pointer shadow-lg active:scale-95"
+              className="absolute top-2.5 right-2.5 sm:top-5 sm:right-5 z-30 p-1.5 sm:p-2.5 rounded-xl text-stone-300 hover:text-white bg-stone-900/80 hover:bg-stone-800 border border-stone-600/70 hover:border-stone-400 transition-all duration-200 cursor-pointer shadow-lg active:scale-95"
               aria-label="Close modal"
               title="Close"
             >
@@ -76,9 +76,9 @@ export const ItiModal: React.FC<ItiModalProps> = React.memo(({ isOpen, onClose }
             <div className="grid grid-cols-2 gap-2 sm:gap-6 mb-2.5 sm:mb-6">
               {/* Card 1: Akash Ghosh */}
               <div className="backdrop-blur-md bg-black/40 border border-white/20 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 flex flex-col items-center justify-between text-center hover:border-amber-400/50 transition-all duration-300 shadow-lg group">
-                {/* Profile Photo inside Round Frame */}
-                <div className="relative w-14 h-14 sm:w-28 sm:h-28 rounded-full p-0.5 sm:p-1 bg-gradient-to-tr from-amber-500/40 via-stone-700 to-amber-300/40 shadow-inner mb-1.5 sm:mb-3.5">
-                  <div className="w-full h-full rounded-full overflow-hidden border border-stone-800 sm:border-2 bg-stone-950">
+                {/* Profile Photo inside Rounded Frame */}
+                <div className="relative w-14 h-14 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl p-0.5 sm:p-1 bg-gradient-to-tr from-amber-500/40 via-stone-700 to-amber-300/40 shadow-inner mb-1.5 sm:mb-3.5">
+                  <div className="w-full h-full rounded-lg sm:rounded-xl overflow-hidden border border-stone-800 sm:border-2 bg-stone-950">
                     <img
                       src="https://res.cloudinary.com/dcn8swiqz/image/upload/v1785936625/1785936218267_ulbtsm.jpg"
                       alt="Akash Ghosh"
@@ -122,9 +122,9 @@ export const ItiModal: React.FC<ItiModalProps> = React.memo(({ isOpen, onClose }
 
               {/* Card 2: Shubhranshu Sarkar */}
               <div className="backdrop-blur-md bg-black/40 border border-white/20 rounded-xl sm:rounded-2xl p-2.5 sm:p-5 flex flex-col items-center justify-between text-center hover:border-amber-400/50 transition-all duration-300 shadow-lg group">
-                {/* Profile Photo inside Round Frame */}
-                <div className="relative w-14 h-14 sm:w-28 sm:h-28 rounded-full p-0.5 sm:p-1 bg-gradient-to-tr from-amber-500/40 via-stone-700 to-amber-300/40 shadow-inner mb-1.5 sm:mb-3.5">
-                  <div className="w-full h-full rounded-full overflow-hidden border border-stone-800 sm:border-2 bg-stone-950">
+                {/* Profile Photo inside Rounded Frame */}
+                <div className="relative w-14 h-14 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl p-0.5 sm:p-1 bg-gradient-to-tr from-amber-500/40 via-stone-700 to-amber-300/40 shadow-inner mb-1.5 sm:mb-3.5">
+                  <div className="w-full h-full rounded-lg sm:rounded-xl overflow-hidden border border-stone-800 sm:border-2 bg-stone-950">
                     <img
                       src="https://res.cloudinary.com/dcn8swiqz/image/upload/v1786817975/shonku.jpg"
                       alt="Shubhranshu Sarkar"
