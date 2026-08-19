@@ -8,11 +8,17 @@ declare global {
   }
 }
 
+export interface SeekRequest {
+  time: number;
+  id: number; // Unique trigger token
+}
+
 interface YouTubeAudioPlayerProps {
   track: Track;
   isPlaying: boolean;
   volume: number;
   isMuted: boolean;
+  seekRequest?: SeekRequest | null;
   onTrackEnd: () => void;
   onTimeUpdate: (currentTime: number, duration: number) => void;
   onPlayerReady?: () => void;
@@ -24,6 +30,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   isPlaying,
   volume,
   isMuted,
+  seekRequest,
   onTrackEnd,
   onTimeUpdate,
   onPlayerReady,
@@ -36,8 +43,33 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   const isPlayerReadyRef = useRef(false);
   const isUsingFallbackRef = useRef(false);
   const timerRef = useRef<any>(null);
-  const currentTrackIdRef = useRef<string>(track.id);
+  
+  // Stable track ID reference to avoid spurious reloads
+  const loadedTrackIdRef = useRef<string>('');
   const lastReportedTimeRef = useRef<number>(0);
+  const lastHandledSeekIdRef = useRef<number | null>(null);
+
+  // Keep latest props in refs to avoid rebuilding effects on volume/callback updates
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
+
+  const onTrackEndRef = useRef(onTrackEnd);
+  onTrackEndRef.current = onTrackEnd;
+
+  const onTimeUpdateRef = useRef(onTimeUpdate);
+  onTimeUpdateRef.current = onTimeUpdate;
+
+  const onPlayerReadyRef = useRef(onPlayerReady);
+  onPlayerReadyRef.current = onPlayerReady;
+
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   // Time tracking loop for YouTube Player
   const startTimeLoop = useCallback(() => {
@@ -45,10 +77,10 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     timerRef.current = setInterval(() => {
       if (isUsingFallbackRef.current && audioFallbackRef.current) {
         const cur = audioFallbackRef.current.currentTime || 0;
-        const dur = audioFallbackRef.current.duration || track.durationSeconds;
-        if (Math.abs(cur - lastReportedTimeRef.current) >= 0.3) {
+        const dur = audioFallbackRef.current.duration || track.durationSeconds || 180;
+        if (Math.abs(cur - lastReportedTimeRef.current) >= 0.25) {
           lastReportedTimeRef.current = cur;
-          onTimeUpdate(cur, dur);
+          onTimeUpdateRef.current(cur, dur);
         }
         return;
       }
@@ -56,17 +88,17 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
         try {
           const currentTime = playerRef.current.getCurrentTime() || 0;
-          const duration = playerRef.current.getDuration() || track.durationSeconds;
-          if (duration > 0 && Math.abs(currentTime - lastReportedTimeRef.current) >= 0.3) {
+          const duration = playerRef.current.getDuration() || track.durationSeconds || 180;
+          if (duration > 0 && Math.abs(currentTime - lastReportedTimeRef.current) >= 0.25) {
             lastReportedTimeRef.current = currentTime;
-            onTimeUpdate(currentTime, duration);
+            onTimeUpdateRef.current(currentTime, duration);
           }
         } catch {
           // Ignore transient read errors
         }
       }
-    }, 500);
-  }, [onTimeUpdate, track.durationSeconds]);
+    }, 400);
+  }, [track.durationSeconds]);
 
   const stopTimeLoop = useCallback(() => {
     if (timerRef.current) {
@@ -85,26 +117,29 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     if (track.audioUrl) {
       audio.src = track.audioUrl;
     } else {
-      // High-quality atmospheric Bengali acoustic stream fallback
       audio.src = 'https://actions.google.com/sounds/v1/ambiences/outdoor_festival_crowd.ogg';
     }
-    audio.volume = isMuted ? 0 : volume / 100;
-    if (isPlaying) {
+    audio.volume = isMutedRef.current ? 0 : volumeRef.current / 100;
+    audio.muted = isMutedRef.current;
+
+    if (isPlayingRef.current) {
       audio.play().catch((e) => console.warn('Audio fallback play prevented:', e));
       startTimeLoop();
     }
 
     audio.onended = () => {
       stopTimeLoop();
-      onTrackEnd();
+      onTrackEndRef.current();
     };
 
     audio.ontimeupdate = () => {
-      onTimeUpdate(audio.currentTime, audio.duration || track.durationSeconds);
+      const cur = audio.currentTime || 0;
+      const dur = audio.duration || track.durationSeconds || 180;
+      onTimeUpdateRef.current(cur, dur);
     };
-  }, [track, isPlaying, volume, isMuted, startTimeLoop, stopTimeLoop, onTrackEnd, onTimeUpdate]);
+  }, [track.audioUrl, track.durationSeconds, startTimeLoop, stopTimeLoop]);
 
-  // Initialize YouTube IFrame API
+  // Initialize YouTube IFrame API Once
   useEffect(() => {
     const initPlayer = () => {
       if (!window.YT || !window.YT.Player || !containerRef.current) return;
@@ -119,7 +154,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
           width: '320',
           videoId: track.id,
           playerVars: {
-            autoplay: isPlaying ? 1 : 0,
+            autoplay: isPlayingRef.current ? 1 : 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
@@ -132,23 +167,30 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
           events: {
             onReady: (event: any) => {
               isPlayerReadyRef.current = true;
-              event.target.setVolume(isMuted ? 0 : volume);
-              if (isMuted && typeof event.target.mute === 'function') {
+              loadedTrackIdRef.current = track.id;
+              
+              const currentVol = isMutedRef.current ? 0 : volumeRef.current;
+              if (typeof event.target.setVolume === 'function') {
+                event.target.setVolume(currentVol);
+              }
+              if (isMutedRef.current && typeof event.target.mute === 'function') {
                 event.target.mute();
-              } else if (!isMuted && typeof event.target.unMute === 'function') {
+              } else if (!isMutedRef.current && typeof event.target.unMute === 'function') {
                 event.target.unMute();
               }
-              if (isPlaying) {
+
+              if (isPlayingRef.current) {
                 event.target.playVideo();
                 startTimeLoop();
               }
-              if (onPlayerReady) onPlayerReady();
+
+              if (onPlayerReadyRef.current) onPlayerReadyRef.current();
             },
             onStateChange: (event: any) => {
               // YT.PlayerState: ENDED (0), PLAYING (1), PAUSED (2), BUFFERING (3)
               if (event.data === 0) {
                 stopTimeLoop();
-                onTrackEnd();
+                onTrackEndRef.current();
               } else if (event.data === 1) {
                 isUsingFallbackRef.current = false;
                 startTimeLoop();
@@ -159,8 +201,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
             onError: (event: any) => {
               const errorCode = typeof event === 'object' && event !== null && 'data' in event ? event.data : event;
               console.warn('YouTube Audio Player embed error:', errorCode, '- activating audio fallback for track:', track.title);
-              if (onError) onError(errorCode);
-              // If video is restricted or cannot embed (codes 101, 150, 100, 2), switch to direct track audio
+              if (onErrorRef.current) onErrorRef.current(errorCode);
               activateAudioFallback();
             },
           },
@@ -201,12 +242,16 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
         }
       }
     };
-  }, []);
+  }, [track.id, activateAudioFallback, startTimeLoop, stopTimeLoop]);
 
-  // Handle Track change
+  // Handle Track change strictly when track.id changes
   useEffect(() => {
-    currentTrackIdRef.current = track.id;
+    if (loadedTrackIdRef.current === track.id) {
+      return; // Same track, do not reload or restart!
+    }
+    loadedTrackIdRef.current = track.id;
     isUsingFallbackRef.current = false;
+    lastReportedTimeRef.current = 0;
 
     if (audioFallbackRef.current) {
       audioFallbackRef.current.pause();
@@ -232,9 +277,9 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     } else if (isPlaying) {
       activateAudioFallback();
     }
-  }, [track.id, activateAudioFallback, isPlaying, startTimeLoop]);
+  }, [track.id, isPlaying, activateAudioFallback, startTimeLoop]);
 
-  // Handle Play/Pause changes
+  // Handle Play / Pause changes
   useEffect(() => {
     if (isUsingFallbackRef.current && audioFallbackRef.current) {
       if (isPlaying) {
@@ -266,7 +311,37 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     }
   }, [isPlaying, activateAudioFallback, startTimeLoop, stopTimeLoop]);
 
-  // Handle Volume and Mute
+  // Handle Seeking when seekRequest is received
+  useEffect(() => {
+    if (!seekRequest || seekRequest.id === lastHandledSeekIdRef.current) {
+      return;
+    }
+    lastHandledSeekIdRef.current = seekRequest.id;
+    const targetTime = Math.max(0, seekRequest.time);
+    lastReportedTimeRef.current = targetTime;
+
+    // 1. YouTube Player seek
+    if (playerRef.current && isPlayerReadyRef.current && !isUsingFallbackRef.current) {
+      try {
+        if (typeof playerRef.current.seekTo === 'function') {
+          playerRef.current.seekTo(targetTime, true);
+        }
+      } catch (err) {
+        console.warn('YouTube seekTo failed:', err);
+      }
+    }
+
+    // 2. Audio fallback seek
+    if (audioFallbackRef.current) {
+      try {
+        audioFallbackRef.current.currentTime = targetTime;
+      } catch (err) {
+        console.warn('Audio fallback seek failed:', err);
+      }
+    }
+  }, [seekRequest]);
+
+  // Handle Volume and Mute without touching playback position
   useEffect(() => {
     if (audioFallbackRef.current) {
       audioFallbackRef.current.volume = isMuted ? 0 : volume / 100;

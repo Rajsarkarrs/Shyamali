@@ -15,6 +15,22 @@ export const PLAYLIST_BACKGROUNDS: Record<string, { day: string; night: string }
     day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786844742/CFS_Vid_00004_uh4noi.mp4',
     night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786844740/CFS_Vid_00005_dqtaxn.mp4',
   },
+  love: {
+    day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995738/CFS_Vid_00006_Prem_Day_Time_uubnth.mp4',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995733/CFS_Vid_00006_Prem_Night_Time_shfqkg.mp4',
+  },
+  nature: {
+    day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995733/CFS_Vid_00006_Prokriti_Day_Time_caaj6f.mp4',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995732/CFS_Vid_00006_Prokriti_Day_Time-1_wy2kpz.mp4',
+  },
+  festival: {
+    day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995735/CFS_Vid_00006_Anusthanik_Day_Time_e7ygtx.mp4',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995731/CFS_Vid_00006_Anusthanik_Night_Time_wuudqz.mp4',
+  },
+  play: {
+    day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995732/CFS_Vid_00006_Bichitra_Day_Time_jgirya.mp4',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786995737/CFS_Vid_00006_Bichitra_Night_Time_pam3lu.mp4',
+  },
 };
 
 const DEFAULT_BACKGROUNDS = PLAYLIST_BACKGROUNDS.puja;

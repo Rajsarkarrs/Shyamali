@@ -64,7 +64,7 @@ export const IndianTimeCard: React.FC = React.memo(() => {
   }, []);
 
   return (
-    <div className="backdrop-blur-md bg-black/35 border border-white/20 rounded-xl sm:rounded-2xl px-2 sm:px-3 h-8 sm:h-9 text-white shadow-xl flex items-center gap-1.5 sm:gap-2 hover:bg-black/45 transition-all select-none group shrink-0">
+    <div className="liquid-glass-pill rounded-xl sm:rounded-2xl px-2.5 sm:px-3 h-8 sm:h-9 text-white shadow-xl flex items-center gap-1.5 sm:gap-2 transition-all select-none group shrink-0">
       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-amber-300 shadow-inner group-hover:scale-105 transition-transform">
         <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
       </div>

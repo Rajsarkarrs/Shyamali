@@ -123,7 +123,7 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
     <div
       id="live-visitors-card"
       title={`${stats.activeCount} active viewer${stats.activeCount === 1 ? '' : 's'} online (${stats.totalVisits} total visits)`}
-      className="backdrop-blur-md bg-black/35 border border-white/20 rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 h-8 sm:h-9 text-white shadow-xl flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-black/45 transition-all select-none shrink-0"
+      className="liquid-glass-pill rounded-xl sm:rounded-2xl px-2.5 sm:px-3.5 h-8 sm:h-9 text-white flex items-center justify-center gap-1.5 sm:gap-2 transition-all select-none shrink-0"
     >
       {/* Exact Live Active Count and Online label */}
       <div className="flex items-center gap-1.5 font-medium">

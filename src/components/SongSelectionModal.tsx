@@ -57,7 +57,7 @@ export const SongSelectionModal: React.FC<SongSelectionModalProps> = React.memo(
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="relative w-full max-w-sm sm:max-w-lg rounded-2xl sm:rounded-[28px] backdrop-blur-xl bg-black/55 border border-white/20 p-3.5 sm:p-6 text-white shadow-2xl shadow-black/95 z-10 overflow-hidden flex flex-col max-h-[82vh] sm:max-h-[85vh] gpu-accelerated"
+            className="relative w-full max-w-sm sm:max-w-lg rounded-2xl sm:rounded-[28px] liquid-glass-card p-3.5 sm:p-6 text-white z-10 overflow-hidden flex flex-col max-h-[82vh] sm:max-h-[85vh] gpu-accelerated"
           >
             {/* Header: PLAYLISTS with Close button */}
             <div className="flex items-center justify-between pb-2 sm:pb-3 border-b border-stone-800/80">

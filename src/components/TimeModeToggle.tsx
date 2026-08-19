@@ -16,7 +16,7 @@ export const TimeModeToggle: React.FC<TimeModeToggleProps> = React.memo(({
   return (
     <div
       id="time-mode-toggle"
-      className="backdrop-blur-md bg-black/35 border border-white/20 rounded-xl sm:rounded-2xl px-1 sm:px-1.5 h-8 sm:h-9 text-white shadow-xl flex items-center gap-1 select-none shrink-0"
+      className="liquid-glass-pill rounded-xl sm:rounded-2xl px-1 sm:px-1.5 h-8 sm:h-9 text-white flex items-center gap-1 select-none shrink-0"
     >
       {/* Auto Mode: 'A' */}
       <button

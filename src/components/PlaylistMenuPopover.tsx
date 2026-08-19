@@ -34,7 +34,7 @@ export const PlaylistMenuPopover: React.FC<PlaylistMenuPopoverProps> = React.mem
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.96 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 z-50 w-[calc(100vw-28px)] max-w-xs sm:max-w-sm sm:w-96 rounded-2xl sm:rounded-3xl backdrop-blur-xl bg-black/55 border border-white/20 p-3 sm:p-4 text-white shadow-2xl shadow-black/90 overflow-hidden gpu-accelerated"
+            className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0 z-50 w-[calc(100vw-28px)] max-w-xs sm:max-w-sm sm:w-96 rounded-2xl sm:rounded-3xl liquid-glass-card p-3 sm:p-4 text-white overflow-hidden gpu-accelerated"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-2 sm:pb-3 border-b border-stone-800/80 mb-2">

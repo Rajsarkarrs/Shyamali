@@ -5,7 +5,7 @@ import { IndianTimeCard } from './components/IndianTimeCard';
 import { TimeModeToggle } from './components/TimeModeToggle';
 import { LiveVisitorsCard } from './components/LiveVisitorsCard';
 import { MusicPlayerCard } from './components/MusicPlayerCard';
-import { YouTubeAudioPlayer } from './components/YouTubeAudioPlayer';
+import { YouTubeAudioPlayer, SeekRequest } from './components/YouTubeAudioPlayer';
 import { ItiModal } from './components/ItiModal';
 import { TimeOfDay, TimeMode, PlayerState, Track, PlaylistCategory } from './types';
 import { PLAYLIST_CATEGORIES } from './data/playlist';
@@ -44,6 +44,7 @@ export default function App() {
   const [playlistCategories] = useState<PlaylistCategory[]>(PLAYLIST_CATEGORIES);
   const [currentCategory, setCurrentCategory] = useState<PlaylistCategory>(PLAYLIST_CATEGORIES[0]);
   const [isItiModalOpen, setIsItiModalOpen] = useState<boolean>(false);
+  const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
   const tracks = currentCategory.tracks.length > 0 ? currentCategory.tracks : PLAYLIST_CATEGORIES[0].tracks;
 
   const [playerState, setPlayerState] = useState<PlayerState>({
@@ -107,6 +108,7 @@ export default function App() {
 
   const handleSeek = useCallback((time: number) => {
     setPlayerState((prev) => ({ ...prev, currentTime: time }));
+    setSeekRequest({ time, id: Date.now() + Math.random() });
   }, []);
 
   const handleVolumeChange = useCallback((vol: number) => {
@@ -152,6 +154,7 @@ export default function App() {
         isPlaying={playerState.isPlaying}
         volume={playerState.volume}
         isMuted={playerState.isMuted}
+        seekRequest={seekRequest}
         onTrackEnd={handleTrackEnd}
         onTimeUpdate={handleTimeUpdate}
       />
@@ -179,7 +182,7 @@ export default function App() {
           <button
             id="iti-glass-trigger-btn"
             onClick={() => setIsItiModalOpen(true)}
-            className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl sm:rounded-2xl backdrop-blur-md bg-black/35 hover:bg-black/55 border border-white/20 hover:border-yellow-400/70 shadow-lg flex items-center justify-center text-yellow-300 font-bengali-handwritten text-sm sm:text-lg transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
+            className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl sm:rounded-2xl liquid-glass-pill flex items-center justify-center text-yellow-300 font-bengali-handwritten text-sm sm:text-lg transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
             title="ইতি - Credits & Notes"
             aria-label="ইতি"
           >
