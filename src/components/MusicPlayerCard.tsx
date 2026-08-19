@@ -197,12 +197,18 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
               title="Click to browse tracks"
             >
               <img
-                src={currentTrack.thumbnail}
+                src={currentTrack.thumbnail || `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`}
                 alt={currentTrack.title}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80';
+                  const img = e.target as HTMLImageElement;
+                  if (img.dataset.failed === 'mq') {
+                    img.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80';
+                  } else {
+                    img.dataset.failed = 'mq';
+                    img.src = `https://img.youtube.com/vi/${currentTrack.id}/mqdefault.jpg`;
+                  }
                 }}
               />
               {/* Playing Animated Equalizer Badge */}
@@ -402,12 +408,18 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
           >
             <div className="w-20 h-20 md:w-22 md:h-22 rounded-2xl overflow-hidden border border-white/20 shadow-lg relative bg-stone-900 flex items-center justify-center">
               <img
-                src={currentTrack.thumbnail}
+                src={currentTrack.thumbnail || `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`}
                 alt={currentTrack.title}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80';
+                  const img = e.target as HTMLImageElement;
+                  if (img.dataset.failed === 'mq') {
+                    img.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80';
+                  } else {
+                    img.dataset.failed = 'mq';
+                    img.src = `https://img.youtube.com/vi/${currentTrack.id}/mqdefault.jpg`;
+                  }
                 }}
               />
               {/* Playing Animated Equalizer Badge */}

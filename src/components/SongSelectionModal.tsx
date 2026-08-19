@@ -130,11 +130,19 @@ export const SongSelectionModal: React.FC<SongSelectionModalProps> = React.memo(
                       {/* Album Thumbnail */}
                       <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl overflow-hidden bg-stone-900 border border-stone-700/60 shrink-0 shadow">
                         <img
-                          src={track.thumbnail}
+                          src={track.thumbnail || `https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`}
                           alt={track.title}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`;
+                            const img = e.target as HTMLImageElement;
+                            if (img.dataset.failed === 'mq') {
+                              img.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80';
+                            } else {
+                              img.dataset.failed = 'mq';
+                              img.src = `https://img.youtube.com/vi/${track.id}/mqdefault.jpg`;
+                            }
                           }}
                         />
                         {isCurrent && isPlaying && (

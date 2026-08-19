@@ -148,11 +148,15 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(mountNode);
 
+      const initialVideoId = (track.id && track.id.length === 11 && !/[^a-zA-Z0-9_-]/.test(track.id))
+        ? track.id
+        : 'q_Cj3zQ1LIA';
+
       try {
         playerRef.current = new window.YT.Player(mountNode, {
           height: '200',
           width: '320',
-          videoId: track.id,
+          videoId: initialVideoId,
           playerVars: {
             autoplay: isPlayingRef.current ? 1 : 0,
             controls: 0,
@@ -257,17 +261,21 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
       audioFallbackRef.current.pause();
     }
 
+    const targetVideoId = (track.id && track.id.length === 11 && !/[^a-zA-Z0-9_-]/.test(track.id))
+      ? track.id
+      : 'q_Cj3zQ1LIA';
+
     if (playerRef.current && typeof playerRef.current.loadVideoById === 'function' && isPlayerReadyRef.current) {
       try {
         if (isPlaying) {
           playerRef.current.loadVideoById({
-            videoId: track.id,
+            videoId: targetVideoId,
             startSeconds: 0,
           });
           startTimeLoop();
         } else {
           playerRef.current.cueVideoById({
-            videoId: track.id,
+            videoId: targetVideoId,
             startSeconds: 0,
           });
         }
