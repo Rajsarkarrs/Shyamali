@@ -235,10 +235,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
               <button
                 onClick={() => setIsMobileVolumeOpen((prev) => !prev)}
                 title={playerState.isMuted ? 'Unmute' : 'Volume'}
-                className={`p-2 rounded-xl border backdrop-blur-md transition-all active:scale-95 flex items-center justify-center ${
+                className={`p-2 rounded-xl liquid-glass-pill transition-all active:scale-95 flex items-center justify-center ${
                   isMobileVolumeOpen
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-400/60 shadow-lg'
-                    : 'bg-white/5 text-stone-300 hover:text-white border-white/10'
+                    ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                    : 'text-stone-300 hover:text-white'
                 }`}
               >
                 {playerState.isMuted || playerState.volume === 0 ? (
@@ -335,10 +335,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onToggleShuffle}
               title={playerState.isShuffle ? 'Shuffle On' : 'Shuffle Off'}
-              className={`p-2 rounded-xl transition-all ${
+              className={`p-2 rounded-xl liquid-glass-pill transition-all active:scale-95 ${
                 playerState.isShuffle
-                  ? 'text-amber-300 bg-amber-500/20'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                  : 'text-stone-300 hover:text-white'
               }`}
             >
               <Shuffle className="w-4 h-4" />
@@ -348,21 +348,21 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onPrevTrack}
               title="Previous Track"
-              className="p-2 rounded-xl text-stone-300 hover:text-white active:scale-90 transition-all"
+              className="p-2 rounded-xl liquid-glass-pill text-stone-300 hover:text-amber-300 active:scale-90 transition-all"
             >
               <SkipBack className="w-5 h-5 fill-current" />
             </button>
 
-            {/* Play / Pause Glow Button */}
+            {/* Play / Pause Liquid Glass Button */}
             <button
               onClick={onTogglePlay}
               title={playerState.isPlaying ? 'Pause' : 'Play'}
-              className="w-11 h-11 bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 hover:from-amber-300 hover:to-yellow-100 rounded-full flex items-center justify-center text-stone-950 shadow-[0_4px_20px_rgba(245,158,11,0.4)] active:scale-95 transition-all"
+              className="w-11 h-11 liquid-glass-pill rounded-full flex items-center justify-center text-amber-300 hover:text-amber-200 border border-amber-400/50 shadow-[0_4px_20px_rgba(245,158,11,0.25)] active:scale-95 transition-all"
             >
               {playerState.isPlaying ? (
-                <Pause className="w-5 h-5 fill-current text-stone-950" />
+                <Pause className="w-5 h-5 fill-amber-300 text-amber-300" />
               ) : (
-                <Play className="w-5 h-5 fill-current text-stone-950 translate-x-0.5" />
+                <Play className="w-5 h-5 fill-amber-300 text-amber-300 translate-x-0.5" />
               )}
             </button>
 
@@ -370,7 +370,7 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onNextTrack}
               title="Next Track"
-              className="p-2 rounded-xl text-stone-300 hover:text-white active:scale-90 transition-all"
+              className="p-2 rounded-xl liquid-glass-pill text-stone-300 hover:text-amber-300 active:scale-90 transition-all"
             >
               <SkipForward className="w-5 h-5 fill-current" />
             </button>
@@ -379,10 +379,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onToggleRepeat}
               title={playerState.isRepeat ? 'Repeat On' : 'Repeat Off'}
-              className={`p-2 rounded-xl transition-all ${
+              className={`p-2 rounded-xl liquid-glass-pill transition-all active:scale-95 ${
                 playerState.isRepeat
-                  ? 'text-amber-300 bg-amber-500/20'
-                  : 'text-stone-400 hover:text-white'
+                  ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                  : 'text-stone-300 hover:text-white'
               }`}
             >
               <Repeat className="w-4 h-4" />
@@ -486,10 +486,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onToggleShuffle}
               title={playerState.isShuffle ? 'Shuffle On' : 'Shuffle Off'}
-              className={`p-2 rounded-xl transition-all ${
+              className={`p-2.5 rounded-xl liquid-glass-pill transition-all active:scale-95 ${
                 playerState.isShuffle
-                  ? 'text-amber-300 bg-amber-500/20'
-                  : 'text-stone-400 hover:text-white hover:bg-white/5'
+                  ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                  : 'text-stone-300 hover:text-white'
               }`}
             >
               <Shuffle className="w-4 h-4" />
@@ -499,21 +499,21 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onPrevTrack}
               title="Previous Track"
-              className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/5 transition-all active:scale-95"
+              className="p-2.5 rounded-xl liquid-glass-pill text-stone-300 hover:text-amber-300 transition-all active:scale-95"
             >
               <SkipBack className="w-4 h-4 fill-current" />
             </button>
 
-            {/* Play / Pause Glow Button */}
+            {/* Play / Pause Liquid Glass Button */}
             <button
               onClick={onTogglePlay}
               title={playerState.isPlaying ? 'Pause' : 'Play'}
-              className="w-12 h-12 bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 hover:from-amber-300 hover:to-yellow-100 rounded-full flex items-center justify-center text-stone-950 shadow-[0_4px_20px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95 transition-all"
+              className="w-12 h-12 liquid-glass-pill rounded-full flex items-center justify-center text-amber-300 hover:text-amber-200 border border-amber-400/50 shadow-[0_4px_20px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95 transition-all"
             >
               {playerState.isPlaying ? (
-                <Pause className="w-5 h-5 fill-current text-stone-950" />
+                <Pause className="w-5 h-5 fill-amber-300 text-amber-300" />
               ) : (
-                <Play className="w-5 h-5 fill-current text-stone-950 translate-x-0.5" />
+                <Play className="w-5 h-5 fill-amber-300 text-amber-300 translate-x-0.5" />
               )}
             </button>
 
@@ -521,7 +521,7 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onNextTrack}
               title="Next Track"
-              className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/5 transition-all active:scale-95"
+              className="p-2.5 rounded-xl liquid-glass-pill text-stone-300 hover:text-amber-300 transition-all active:scale-95"
             >
               <SkipForward className="w-4 h-4 fill-current" />
             </button>
@@ -530,10 +530,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
             <button
               onClick={onToggleRepeat}
               title={playerState.isRepeat ? 'Repeat On' : 'Repeat Off'}
-              className={`p-2 rounded-xl transition-all ${
+              className={`p-2.5 rounded-xl liquid-glass-pill transition-all active:scale-95 ${
                 playerState.isRepeat
-                  ? 'text-amber-300 bg-amber-500/20'
-                  : 'text-stone-400 hover:text-white hover:bg-white/5'
+                  ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                  : 'text-stone-300 hover:text-white'
               }`}
             >
               <Repeat className="w-4 h-4" />
@@ -544,10 +544,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
               <button
                 onClick={() => setIsDesktopVolumeOpen((prev) => !prev)}
                 title="Volume"
-                className={`p-2 rounded-xl border backdrop-blur-md transition-all active:scale-95 flex items-center justify-center ${
+                className={`p-2.5 rounded-xl liquid-glass-pill transition-all active:scale-95 flex items-center justify-center ${
                   isDesktopVolumeOpen
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-400/60 shadow-lg'
-                    : 'bg-white/5 text-stone-300 hover:text-white border-white/10 hover:bg-white/10'
+                    ? 'text-amber-300 border-amber-400/60 bg-amber-500/20'
+                    : 'text-stone-300 hover:text-white'
                 }`}
               >
                 {playerState.isMuted || playerState.volume === 0 ? (

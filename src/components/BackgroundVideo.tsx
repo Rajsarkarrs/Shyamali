@@ -4,12 +4,18 @@ import { TimeOfDay } from '../types';
 interface BackgroundVideoProps {
   timeOfDay: TimeOfDay;
   categoryId?: string;
+  isIdle?: boolean;
 }
+
+export const IDLE_BACKGROUNDS = {
+  day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1787161288/Idel_day_gwr_video_mvp_ji0iky.mp4',
+  night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1787161279/Idel_night_gwr_video_mvp_yboixu.mp4',
+};
 
 export const PLAYLIST_BACKGROUNDS: Record<string, { day: string; night: string }> = {
   puja: {
     day: 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00003.mp4?updatedAt=1786807598064',
-    night: 'https://ik.imagekit.io/8ja4doxcww/CFS_Vid_00002.mp4?updatedAt=1786807598943',
+    night: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1787160720/CFS_Vid_00006_Puja_Day_time_zepe3h.mp4',
   },
   swadeshi: {
     day: 'https://res.cloudinary.com/dcn8swiqz/video/upload/v1786844742/CFS_Vid_00004_uh4noi.mp4',
@@ -35,13 +41,13 @@ export const PLAYLIST_BACKGROUNDS: Record<string, { day: string; night: string }
 
 const DEFAULT_BACKGROUNDS = PLAYLIST_BACKGROUNDS.puja;
 
-export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ timeOfDay, categoryId = 'puja' }) => {
+export const BackgroundVideo: React.FC<BackgroundVideoProps> = React.memo(({ timeOfDay, categoryId = 'puja', isIdle = false }) => {
   const dayVideoRef = useRef<HTMLVideoElement | null>(null);
   const nightVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const bgConfig = PLAYLIST_BACKGROUNDS[categoryId] || DEFAULT_BACKGROUNDS;
-  const dayUrl = bgConfig.day;
-  const nightUrl = bgConfig.night;
+  const dayUrl = isIdle ? IDLE_BACKGROUNDS.day : bgConfig.day;
+  const nightUrl = isIdle ? IDLE_BACKGROUNDS.night : bgConfig.night;
 
   // Manage playback to conserve battery/GPU resources on mobile devices
   useEffect(() => {

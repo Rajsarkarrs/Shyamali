@@ -100,7 +100,7 @@ export const SongSelectionModal: React.FC<SongSelectionModalProps> = React.memo(
             <div className="flex-1 overflow-y-auto pr-1 space-y-1 sm:space-y-1.5 custom-scrollbar min-h-40">
               {displayTracks.map((track, displayIdx) => {
                 // Find actual global index in playlist.tracks
-                const globalIndex = playlist.tracks.findIndex((t) => t.id === track.id);
+                const globalIndex = playlist.tracks.indexOf(track);
                 const isCurrent = globalIndex === currentTrackIndex;
                 const formattedNum = (displayIdx + 1).toString().padStart(2, '0');
 

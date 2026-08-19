@@ -242,7 +242,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
         }
       }
     };
-  }, [track.id, activateAudioFallback, startTimeLoop, stopTimeLoop]);
+  }, [activateAudioFallback, startTimeLoop, stopTimeLoop]);
 
   // Handle Track change strictly when track.id changes
   useEffect(() => {

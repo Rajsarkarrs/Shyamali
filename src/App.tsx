@@ -45,6 +45,7 @@ export default function App() {
   const [currentCategory, setCurrentCategory] = useState<PlaylistCategory>(PLAYLIST_CATEGORIES[0]);
   const [isItiModalOpen, setIsItiModalOpen] = useState<boolean>(false);
   const [seekRequest, setSeekRequest] = useState<SeekRequest | null>(null);
+  const [hasMusicStarted, setHasMusicStarted] = useState<boolean>(false);
   const tracks = currentCategory.tracks.length > 0 ? currentCategory.tracks : PLAYLIST_CATEGORIES[0].tracks;
 
   const [playerState, setPlayerState] = useState<PlayerState>({
@@ -57,6 +58,13 @@ export default function App() {
     isShuffle: false,
     isRepeat: false,
   });
+
+  // Track when music starts playing for the first time
+  useEffect(() => {
+    if (playerState.isPlaying && !hasMusicStarted) {
+      setHasMusicStarted(true);
+    }
+  }, [playerState.isPlaying, hasMusicStarted]);
 
   const currentTrack = tracks[playerState.currentTrackIndex] || tracks[0];
 
@@ -145,8 +153,12 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between p-3 sm:p-6 md:p-8 font-sans overflow-x-hidden antialiased select-none text-white">
-      {/* Dynamic Background Video (Day/Night 6AM-6PM IST or Toggle per Playlist) */}
-      <BackgroundVideo timeOfDay={effectiveTimeOfDay} categoryId={currentCategory.id} />
+      {/* Dynamic Background Video (Idle state before play vs Playlist background) */}
+      <BackgroundVideo
+        timeOfDay={effectiveTimeOfDay}
+        categoryId={currentCategory.id}
+        isIdle={!hasMusicStarted}
+      />
 
       {/* Hidden YouTube & Audio Engine (No video frame rendered) */}
       <YouTubeAudioPlayer
