@@ -967,13 +967,336 @@ export const PLAYLIST_CATEGORIES: PlaylistCategory[] = [
   }
 ],
   },
-  {
+    {
     id: 'nature',
     nameEnglish: 'Nature',
     nameBengali: 'প্রকৃতি',
-    available: false,
-    tagline: 'Serene monsoon, river, and mountain ambient soundscapes.',
-    tracks: [],
+    available: true,
+    tagline: 'Prakriti Porjay (প্রকৃতি পর্যায়) - Nature & Seasonal Songs of Tagore',
+    playlistUrl: 'https://youtube.com/playlist?list=PLdOfvvJ9Us-A',
+    subcategories: ['ALL SONGS'],
+    tracks: [
+      {
+            "id": "RW-Y-E6osQc",
+            "title": "Daruno Agnibaney",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/RW-Y-E6osQc/hqdefault.jpg",
+            "durationSeconds": 178,
+            "category": "NATURE"
+      },
+      {
+            "id": "wYvxsHgsFLA",
+            "title": "Eso He Boishakh | Lyrical Song | Dwjen Mukhopadhyay | Latest Bengali Song 2021",
+            "artist": "Sony Music Bangla",
+            "thumbnail": "https://i.ytimg.com/vi/wYvxsHgsFLA/hqdefault.jpg",
+            "durationSeconds": 219,
+            "category": "NATURE"
+      },
+      {
+            "id": "6wFFYFWDpTA",
+            "title": "Boishakher Ei Bhorer Howya(বৈশাখের এই ভোরের হাওয়া) by Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/6wFFYFWDpTA/hqdefault.jpg",
+            "durationSeconds": 201,
+            "category": "NATURE"
+      },
+      {
+            "id": "qcOtMB0xEd4",
+            "title": "Eso Shyamalo Sundaro(এসো শ্যামল সুন্দর) - Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/qcOtMB0xEd4/hqdefault.jpg",
+            "durationSeconds": 148,
+            "category": "NATURE"
+      },
+      {
+            "id": "ohwMwGi4784",
+            "title": "Oi Ase Oi Ati(ওই আসে ওই   অতি)- Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/ohwMwGi4784/hqdefault.jpg",
+            "durationSeconds": 365,
+            "category": "NATURE"
+      },
+      {
+            "id": "iRYLU_RkQ9o",
+            "title": "Gohono Ghono Chhailo",
+            "artist": "Subinoy Roy",
+            "thumbnail": "https://i.ytimg.com/vi/iRYLU_RkQ9o/hqdefault.jpg",
+            "durationSeconds": 261,
+            "category": "NATURE"
+      },
+      {
+            "id": "A35iIsaAOtk",
+            "title": "Aji bari jhare(আজ বারি ঝরে ঝরঝর ভরা বাদরে_) - Suchitra Mitra",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/A35iIsaAOtk/hqdefault.jpg",
+            "durationSeconds": 160,
+            "category": "NATURE"
+      },
+      {
+            "id": "my0hPp9p4P4",
+            "title": "Timir Abagunthane -SUBINOY RAY",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/my0hPp9p4P4/hqdefault.jpg",
+            "durationSeconds": 291,
+            "category": "NATURE"
+      },
+      {
+            "id": "JWLJPOE6uLY",
+            "title": "APRAKASHITA RABINDRANATH Chhaya ghanaichhe boe bone Hemanta Mukhopadhyay Lyric and music Rabindrana",
+            "artist": "faridul islam",
+            "thumbnail": "https://i.ytimg.com/vi/JWLJPOE6uLY/hqdefault.jpg",
+            "durationSeconds": 245,
+            "category": "NATURE"
+      },
+      {
+            "id": "h51HImuenWs",
+            "title": "Gahano Rate Shrabandhara(গহন রাতে শ্রাবণধারা পড়িছে)-Suchitra Mitra",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/h51HImuenWs/hqdefault.jpg",
+            "durationSeconds": 235,
+            "category": "NATURE"
+      },
+      {
+            "id": "pk-180OgHNw",
+            "title": "Neel Anjana Ghana-D.B.",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/pk-180OgHNw/hqdefault.jpg",
+            "durationSeconds": 259,
+            "category": "NATURE"
+      },
+      {
+            "id": "onX7YvibnsA",
+            "title": "Pothik Megher Dol",
+            "artist": "Subinoy Roy",
+            "thumbnail": "https://i.ytimg.com/vi/onX7YvibnsA/hqdefault.jpg",
+            "durationSeconds": 204,
+            "category": "NATURE"
+      },
+      {
+            "id": "KrwhEYNmC0k",
+            "title": "BAZRO MANIK",
+            "artist": "saurav ganguly",
+            "thumbnail": "https://i.ytimg.com/vi/KrwhEYNmC0k/hqdefault.jpg",
+            "durationSeconds": 360,
+            "category": "NATURE"
+      },
+      {
+            "id": "B-lx2oxTQv8",
+            "title": "Badal Baul Bajay(বাদল-বাউল বাজায় রে একতারা)- Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/B-lx2oxTQv8/hqdefault.jpg",
+            "durationSeconds": 320,
+            "category": "NATURE"
+      },
+      {
+            "id": "4PNe3KO2SRE",
+            "title": "Eki Gabhir Bani Elo",
+            "artist": "Chinmoy Chatterjee",
+            "thumbnail": "https://i.ytimg.com/vi/4PNe3KO2SRE/hqdefault.jpg",
+            "durationSeconds": 127,
+            "category": "NATURE"
+      },
+      {
+            "id": "ZJhQHbkxs3s",
+            "title": "Aaj shrabaner purnimate(আজ শ্রাবণের পূর্ণিমাতে কী এনেছিস বল্‌) - DEBABRATA BISWAS",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/ZJhQHbkxs3s/hqdefault.jpg",
+            "durationSeconds": 249,
+            "category": "NATURE"
+      },
+      {
+            "id": "XLOWu-ukk04",
+            "title": "Taper taper badhan(তপের তাপের বাঁধন)- Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/XLOWu-ukk04/hqdefault.jpg",
+            "durationSeconds": 340,
+            "category": "NATURE"
+      },
+      {
+            "id": "74Rypvp3k7A",
+            "title": "Shrabon Tumi Batasey Kar",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/74Rypvp3k7A/hqdefault.jpg",
+            "durationSeconds": 143,
+            "category": "NATURE"
+      },
+      {
+            "id": "vg_T6lmXkzM",
+            "title": "Madhugandhe Bhara Mreedu Singdhachhaya",
+            "artist": "Lata Mangeshkar",
+            "thumbnail": "https://i.ytimg.com/vi/vg_T6lmXkzM/hqdefault.jpg",
+            "durationSeconds": 213,
+            "category": "NATURE"
+      },
+      {
+            "id": "JYMm8H2alOA",
+            "title": "Neel Naboghano Aashar Gagane",
+            "artist": "Arghya Sen",
+            "thumbnail": "https://i.ytimg.com/vi/JYMm8H2alOA/hqdefault.jpg",
+            "durationSeconds": 259,
+            "category": "NATURE"
+      },
+      {
+            "id": "Btcl0w2Xg-Y",
+            "title": "Hriday Amar Nache Re Aajike",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/Btcl0w2Xg-Y/hqdefault.jpg",
+            "durationSeconds": 237,
+            "category": "NATURE"
+      },
+      {
+            "id": "mRuYGxGv1v8",
+            "title": "Aji barisano mukhorito(আজি বরিষনমুখরিত শ্রাবণরাতি)- Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/mRuYGxGv1v8/hqdefault.jpg",
+            "durationSeconds": 275,
+            "category": "NATURE"
+      },
+      {
+            "id": "w8qBY_JS-0M",
+            "title": "Mona Mor Megher Sanghi -Hemanta Mukherjee -Rabindra Sangeet",
+            "artist": "HemantaBangla",
+            "thumbnail": "https://i.ytimg.com/vi/w8qBY_JS-0M/hqdefault.jpg",
+            "durationSeconds": 195,
+            "category": "NATURE"
+      },
+      {
+            "id": "i8FQ62ykaE0",
+            "title": "Mor Bhabonare Ki Haway Matalo - Chinmoy Chatterjee [Remastered]",
+            "artist": "Tanvir Hossain",
+            "thumbnail": "https://i.ytimg.com/vi/i8FQ62ykaE0/hqdefault.jpg",
+            "durationSeconds": 172,
+            "category": "NATURE"
+      },
+      {
+            "id": "2lPGyDm770k",
+            "title": "Aaji Tomay Abar Chai Shunabare",
+            "artist": "Sagar Sen",
+            "thumbnail": "https://i.ytimg.com/vi/2lPGyDm770k/hqdefault.jpg",
+            "durationSeconds": 194,
+            "category": "NATURE"
+      },
+      {
+            "id": "BtZbtQ52U-E",
+            "title": "Aji Jhoro Jhoro Mukhoro Badoro Dine Rabindrasangeet by Debabrata Biswas",
+            "artist": "Kanti Mitra",
+            "thumbnail": "https://i.ytimg.com/vi/BtZbtQ52U-E/hqdefault.jpg",
+            "durationSeconds": 232,
+            "category": "NATURE"
+      },
+      {
+            "id": "0NeZyyoxCxU",
+            "title": "Aaji Sharat Tapane Prabhat Swapane",
+            "artist": "Hemanta Mukherjee",
+            "thumbnail": "https://i.ytimg.com/vi/0NeZyyoxCxU/hqdefault.jpg",
+            "durationSeconds": 174,
+            "category": "NATURE"
+      },
+      {
+            "id": "Oht5VR9fOHk",
+            "title": "Aj Dhaner Kshete Roudråchhaya(আজ ধানের ক্ষেতে রৌদ্রছায়ায়) -SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/Oht5VR9fOHk/hqdefault.jpg",
+            "durationSeconds": 195,
+            "category": "NATURE"
+      },
+      {
+            "id": "KDeAVnMxRR4",
+            "title": "Amolo Dhobolo Paley",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/KDeAVnMxRR4/hqdefault.jpg",
+            "durationSeconds": 218,
+            "category": "NATURE"
+      },
+      {
+            "id": "lAFN1SnX2u0",
+            "title": "Amar Nayån Bhulano Ele -SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/lAFN1SnX2u0/hqdefault.jpg",
+            "durationSeconds": 186,
+            "category": "NATURE"
+      },
+      {
+            "id": "_PZip4UFg8Q",
+            "title": "Sharatey Aj Kon Atithi",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/_PZip4UFg8Q/hqdefault.jpg",
+            "durationSeconds": 200,
+            "category": "NATURE"
+      },
+      {
+            "id": "f-6r1EIRs4o",
+            "title": "Tomra Ja Bolo Tai Bolo",
+            "artist": "Sagar Sen",
+            "thumbnail": "https://i.ytimg.com/vi/f-6r1EIRs4o/hqdefault.jpg",
+            "durationSeconds": 297,
+            "category": "NATURE"
+      },
+      {
+            "id": "IKQtvBLbis8",
+            "title": "Sharat Tomar Arun Alor Anjali(শরৎ, তোমার অরুণ আলোর অঞ্জলি) - Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/IKQtvBLbis8/hqdefault.jpg",
+            "durationSeconds": 305,
+            "category": "NATURE"
+      },
+      {
+            "id": "lyWWeJhS1EQ",
+            "title": "Aamar Raat Pohalo(আমার রাত পোহালো শারদ প্রাতে) -SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/lyWWeJhS1EQ/hqdefault.jpg",
+            "durationSeconds": 120,
+            "category": "NATURE"
+      },
+      {
+            "id": "mazQAirscSw",
+            "title": "Himero Rate Oi Gaganer(হিমের রাতে ওই গগনের দীপগুলিরে)-SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/mazQAirscSw/hqdefault.jpg",
+            "durationSeconds": 175,
+            "category": "NATURE"
+      },
+      {
+            "id": "Ap2OKLTkevU",
+            "title": "Hay Hemantalaksmi | Lyrical Song | Dwijen Mukhopadhyay | Latest Bengali Song 2021 | Sony Music East",
+            "artist": "Sony Music Bangla",
+            "thumbnail": "https://i.ytimg.com/vi/Ap2OKLTkevU/hqdefault.jpg",
+            "durationSeconds": 172,
+            "category": "NATURE"
+      },
+      {
+            "id": "eBCuUDulrOI",
+            "title": "Shiter Haoar",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/eBCuUDulrOI/hqdefault.jpg",
+            "durationSeconds": 153,
+            "category": "NATURE"
+      },
+      {
+            "id": "3FJohQAFOAM",
+            "title": "Poush toder dak diyeche by Suchitra Mitra || Tagore song || Video-photomix",
+            "artist": "Sonabeej",
+            "thumbnail": "https://i.ytimg.com/vi/3FJohQAFOAM/hqdefault.jpg",
+            "durationSeconds": 164,
+            "category": "NATURE"
+      },
+      {
+            "id": "iYbKj3bwtKk",
+            "title": "Aar Nai Je Deri",
+            "artist": "Chinmoy Chatterjee",
+            "thumbnail": "https://i.ytimg.com/vi/iYbKj3bwtKk/hqdefault.jpg",
+            "durationSeconds": 159,
+            "category": "NATURE"
+      },
+      {
+            "id": "W-0zE90S0Ms",
+            "title": "Shiter Bone Kon Se",
+            "artist": "Dwijen Mukhopadhyay",
+            "thumbnail": "https://i.ytimg.com/vi/W-0zE90S0Ms/hqdefault.jpg",
+            "durationSeconds": 221,
+            "category": "NATURE"
+      }
+],
   },
   {
     id: 'play',

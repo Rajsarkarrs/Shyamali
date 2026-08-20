@@ -151,6 +151,63 @@ export default function App() {
     }));
   }, []);
 
+  // Global Keyboard Event Listeners for Media Control Shortcuts:
+  // - Space: Play / Pause
+  // - ArrowRight: Next Track
+  // - ArrowLeft: Previous Track
+  // - ArrowUp: Increase Volume (+5%)
+  // - ArrowDown: Decrease Volume (-5%)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Avoid intercepting keystrokes when typing in inputs, textareas, or content-editable elements
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        handleTogglePlay();
+      } else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextTrack();
+      } else if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevTrack();
+      } else if (e.code === 'ArrowUp' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setPlayerState((prev) => {
+          const newVol = Math.min(100, prev.volume + 5);
+          return {
+            ...prev,
+            volume: newVol,
+            isMuted: false,
+          };
+        });
+      } else if (e.code === 'ArrowDown' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setPlayerState((prev) => {
+          const newVol = Math.max(0, prev.volume - 5);
+          return {
+            ...prev,
+            volume: newVol,
+            isMuted: newVol === 0 ? true : prev.isMuted,
+          };
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleTogglePlay, handleNextTrack, handlePrevTrack]);
+
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between p-3 sm:p-6 md:p-8 font-sans overflow-x-hidden antialiased select-none text-white">
       {/* Dynamic Background Video (Idle state before play vs Playlist background) */}
