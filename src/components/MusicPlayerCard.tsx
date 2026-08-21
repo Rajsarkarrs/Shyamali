@@ -144,7 +144,6 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
           title="Select Songs from this Playlist"
           className="liquid-glass-pill rounded-xl sm:rounded-2xl px-3 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-200 flex items-center gap-1.5 active:scale-95 group"
         >
-          <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse shrink-0" />
           <span className="truncate max-w-[130px] sm:max-w-[220px]">
             {currentCategory.nameEnglish} ({currentCategory.nameBengali})
           </span>

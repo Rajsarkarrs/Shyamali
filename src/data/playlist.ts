@@ -1298,13 +1298,144 @@ export const PLAYLIST_CATEGORIES: PlaylistCategory[] = [
       }
 ],
   },
-  {
+    {
     id: 'play',
     nameEnglish: 'Play',
     nameBengali: 'বিচিত্র',
-    available: false,
-    tagline: 'Eclectic instrumental and folk rhythm experiments.',
-    tracks: [],
+    available: true,
+    tagline: 'Bichitro Porjay (বিচিত্র পর্যায়) & Dramatic Compositions of Tagore',
+    playlistUrl: 'https://youtube.com/playlist?list=PLYIA_dqomXlY',
+    subcategories: ['ALL SONGS'],
+    tracks: [
+      {
+            "id": "-TwgDGxjmTY",
+            "title": "আমার নাই বা হল পারে  । শ্যামল মিত্র _ রবীন্দ্রসংগীত।Amar Nai Ba holo _ Shyamal Mitra",
+            "artist": "Tarak KB",
+            "thumbnail": "https://i.ytimg.com/vi/-TwgDGxjmTY/hqdefault.jpg",
+            "durationSeconds": 160,
+            "category": "PLAY"
+      },
+      {
+            "id": "sx1q6AnMTTw",
+            "title": "Jakhon Porbe Naa Mor Payer -Hemanta Mukherjee -Rabindra Sangeet",
+            "artist": "HemantaBangla",
+            "thumbnail": "https://i.ytimg.com/vi/sx1q6AnMTTw/hqdefault.jpg",
+            "durationSeconds": 206,
+            "category": "PLAY"
+      },
+      {
+            "id": "pxYw9TeGI9o",
+            "title": "Gramchhara Oi Ranga Matir Path -SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/pxYw9TeGI9o/hqdefault.jpg",
+            "durationSeconds": 187,
+            "category": "PLAY"
+      },
+      {
+            "id": "Cw5pdEoh4ZA",
+            "title": "Ei To Bhalo Legechhilo - Hemanta Mukherjee",
+            "artist": "Hemanta Mukherjee",
+            "thumbnail": "https://i.ytimg.com/vi/Cw5pdEoh4ZA/hqdefault.jpg",
+            "durationSeconds": 213,
+            "category": "PLAY"
+      },
+      {
+            "id": "3FhhQ7iIa2Y",
+            "title": "40. Rangiye diye jao jao   Old golden memory of Rabindra Sangeet by Hemanta Mukherjee",
+            "artist": "mhmusic dh",
+            "thumbnail": "https://i.ytimg.com/vi/3FhhQ7iIa2Y/hqdefault.jpg",
+            "durationSeconds": 145,
+            "category": "PLAY"
+      },
+      {
+            "id": "EEw5TV6Q_TU",
+            "title": "Swapan Parer Daak Shunechhi(স্বপন-পারের ডাক শুনেছি) -Suchitra Mitra",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/EEw5TV6Q_TU/hqdefault.jpg",
+            "durationSeconds": 150,
+            "category": "PLAY"
+      },
+      {
+            "id": "77IQ9HD4nFU",
+            "title": "Suchitra Mitra Amar Jirna Pata Jabar Belai(আমার জীর্ণ পাতা যাবার বেলায়)",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/77IQ9HD4nFU/hqdefault.jpg",
+            "durationSeconds": 180,
+            "category": "PLAY"
+      },
+      {
+            "id": "igjIGEAtX4Y",
+            "title": "Dinguli Mor Sonar Khanchay | Debabrata Biswas | Bengali Tagore | Audio Song",
+            "artist": "Hindusthan Record",
+            "thumbnail": "https://i.ytimg.com/vi/igjIGEAtX4Y/hqdefault.jpg",
+            "durationSeconds": 186,
+            "category": "PLAY"
+      },
+      {
+            "id": "RQNOf1qn-rE",
+            "title": "NA GO EI JE DHULA - ARGHYA SEN",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/RQNOf1qn-rE/hqdefault.jpg",
+            "durationSeconds": 210,
+            "category": "PLAY"
+      },
+      {
+            "id": "MZuqlHY-I90",
+            "title": "Alo Amar Alo Ogo",
+            "artist": "Debabrata Biswas",
+            "thumbnail": "https://i.ytimg.com/vi/MZuqlHY-I90/hqdefault.jpg",
+            "durationSeconds": 299,
+            "category": "PLAY"
+      },
+      {
+            "id": "bgctPKKZSsk",
+            "title": "Ore Ore Ore(ওরে ওরে ওরে,আমার মন মেতেছে)- SUCHITRA MITRA",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/bgctPKKZSsk/hqdefault.jpg",
+            "durationSeconds": 100,
+            "category": "PLAY"
+      },
+      {
+            "id": "hBOkuAZSibE",
+            "title": "Kharabayu Boy Bege",
+            "artist": "Chinmoy Chatterjee",
+            "thumbnail": "https://i.ytimg.com/vi/hBOkuAZSibE/hqdefault.jpg",
+            "durationSeconds": 120,
+            "category": "PLAY"
+      },
+      {
+            "id": "uVF54HtoNO4",
+            "title": "Debabrata Biswas -Sudhu jaoa asa(শুধু যাওয়া আসা, শুধু স্রোতে ভাসা)",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/uVF54HtoNO4/hqdefault.jpg",
+            "durationSeconds": 205,
+            "category": "PLAY"
+      },
+      {
+            "id": "txn3D8uNwxU",
+            "title": "হেমন্ত মুখোপাধ্যায়-রবীন্দ্রসংগ���ত -কৃষ্ণকলি আমি তারেই বলি-Hemanta Mukherjee- KRISHNAKOLI AMI TAREI",
+            "artist": "Pulakito",
+            "thumbnail": "https://i.ytimg.com/vi/txn3D8uNwxU/hqdefault.jpg",
+            "durationSeconds": 304,
+            "category": "PLAY"
+      },
+      {
+            "id": "KdbJnt4U-8U",
+            "title": "Tumi ki keboli chhobi(তুমি কি কেবলই ছবি)-Hemanta Mukhopadhyay",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/KdbJnt4U-8U/hqdefault.jpg",
+            "durationSeconds": 210,
+            "category": "PLAY"
+      },
+      {
+            "id": "seNWlAeJpag",
+            "title": "Je kebol paliye(যে কেবল পালিয়ে বেড়ায়) -Debabrata Biswas",
+            "artist": "Anjan Chakraborty",
+            "thumbnail": "https://i.ytimg.com/vi/seNWlAeJpag/hqdefault.jpg",
+            "durationSeconds": 190,
+            "category": "PLAY"
+      }
+],
   },
   {
     id: 'festival',
