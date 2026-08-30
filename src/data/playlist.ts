@@ -1438,14 +1438,6 @@ export const PLAYLIST_CATEGORIES: PlaylistCategory[] = [
 ],
   },
   {
-    id: 'festival',
-    nameEnglish: 'Festival',
-    nameBengali: 'আনুষ্ঠানিক',
-    available: false,
-    tagline: 'Festive celebrations, Nababarsho & Diwali harmonics.',
-    tracks: [],
-  },
-  {
     id: 'swadeshi',
     nameEnglish: 'Swadeshi',
     nameBengali: 'স্বদেশী',
