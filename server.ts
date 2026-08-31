@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 
 const app = express();
@@ -10,16 +11,57 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.text({ type: ['text/*', 'application/json'] }));
 
+// CORS & Anti-Caching headers for all visitor API routes
+app.use("/api/visitors", (_req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Cache-Control, Pragma");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // Real-time SSE & Ping Live Visitor Tracking
 interface SSEClient {
   id: string;
   res: express.Response;
 }
 
+const STATE_FILE = path.join(process.cwd(), '.visitors_state.json');
 const activeSessions = new Map<string, number>(); // sessionId -> lastSeen timestamp
 const visitedSessionIds = new Set<string>();
 let sseClients: SSEClient[] = [];
 let totalVisits = 108; // Starting base visit count
+
+// Load initial state if exists
+try {
+  if (fs.existsSync(STATE_FILE)) {
+    const raw = fs.readFileSync(STATE_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed.totalVisits) totalVisits = Math.max(totalVisits, parsed.totalVisits);
+    if (Array.isArray(parsed.active)) {
+      const now = Date.now();
+      for (const item of parsed.active) {
+        if (item.id && item.time && now - item.time < 30000) {
+          activeSessions.set(item.id, item.time);
+          visitedSessionIds.add(item.id);
+        }
+      }
+    }
+  }
+} catch {
+  // Ignore state file read error
+}
+
+function saveState() {
+  try {
+    const active = Array.from(activeSessions.entries()).map(([id, time]) => ({ id, time }));
+    fs.writeFileSync(STATE_FILE, JSON.stringify({ totalVisits, active }));
+  } catch {
+    // Ignore state file write error
+  }
+}
 
 const SESSION_TIMEOUT = 30000; // 30 seconds timeout for inactive sessions
 
@@ -32,6 +74,7 @@ function cleanStaleSessions(): boolean {
       removed = true;
     }
   }
+  if (removed) saveState();
   return removed;
 }
 
@@ -61,14 +104,17 @@ function broadcastVisitorStats() {
 }
 
 function extractSessionId(req: express.Request): string | null {
+  if (req.query && req.query.sessionId) {
+    return String(req.query.sessionId).trim();
+  }
   if (!req.body) return null;
   if (typeof req.body === 'object' && req.body.sessionId) {
-    return String(req.body.sessionId);
+    return String(req.body.sessionId).trim();
   }
   if (typeof req.body === 'string') {
     try {
       const parsed = JSON.parse(req.body);
-      if (parsed && parsed.sessionId) return String(parsed.sessionId);
+      if (parsed && parsed.sessionId) return String(parsed.sessionId).trim();
     } catch {
       if (req.body.startsWith('s_')) return req.body.trim();
     }
@@ -76,15 +122,7 @@ function extractSessionId(req: express.Request): string | null {
   return null;
 }
 
-// Periodically clean stale sessions and broadcast if count changed
-setInterval(() => {
-  if (cleanStaleSessions()) {
-    broadcastVisitorStats();
-  }
-}, 5000);
-
-// Ping endpoint for active session pulse
-app.post("/api/visitors/ping", (req, res) => {
+function handlePing(req: express.Request, res: express.Response) {
   const sessionId = extractSessionId(req);
   if (sessionId) {
     if (!visitedSessionIds.has(sessionId)) {
@@ -92,28 +130,38 @@ app.post("/api/visitors/ping", (req, res) => {
       totalVisits++;
     }
     activeSessions.set(sessionId, Date.now());
+    saveState();
   }
   const stats = getActiveStats();
   broadcastVisitorStats();
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json(stats);
-});
+}
+
+// Periodically clean stale sessions and broadcast if count changed
+setInterval(() => {
+  if (cleanStaleSessions()) {
+    broadcastVisitorStats();
+  }
+}, 4000);
+
+// Ping endpoint for active session pulse (supports both POST and GET)
+app.post("/api/visitors/ping", handlePing);
+app.get("/api/visitors/ping", handlePing);
 
 // Leave endpoint when user closes tab
 app.post("/api/visitors/leave", (req, res) => {
   const sessionId = extractSessionId(req);
   if (sessionId) {
     activeSessions.delete(sessionId);
+    saveState();
   }
   const stats = getActiveStats();
   broadcastVisitorStats();
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({ ok: true });
 });
 
 // REST endpoint for initial / fallback count
 app.get("/api/visitors/count", (_req, res) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json(getActiveStats());
 });
 

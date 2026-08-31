@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { joinRoom } from '@trystero-p2p/mqtt';
 import { VisitorStats } from '../types';
 
 let memorySessionId = '';
 
 function getOrCreateSessionId(): string {
   try {
-    // Try localStorage first for persistent device identity across refreshes
     let id = localStorage.getItem('shyamali_device_id');
     if (!id) {
       id = sessionStorage.getItem('shyamali_visitor_session_id');
@@ -34,6 +34,9 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
     totalVisits: 108,
   });
   const sessionIdRef = useRef<string>('');
+  const peerCountRef = useRef<number>(1);
+  const serverCountRef = useRef<number>(1);
+  const localTabsRef = useRef<number>(1);
 
   if (!sessionIdRef.current) {
     sessionIdRef.current = getOrCreateSessionId();
@@ -43,49 +46,138 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
     const sessionId = sessionIdRef.current;
     let isMounted = true;
 
-    const applyStats = (data: Partial<VisitorStats>) => {
+    // Recalculate best active viewers count across all sync layers
+    const updateMergedStats = (totalVisits?: number) => {
       if (!isMounted) return;
-      if (typeof data.activeCount === 'number') {
-        setStats((prev) => ({
-          activeCount: Math.max(1, data.activeCount ?? prev.activeCount),
-          totalVisits: data.totalVisits ?? prev.totalVisits,
-        }));
-      }
+      const combinedActive = Math.max(
+        peerCountRef.current,
+        serverCountRef.current,
+        localTabsRef.current,
+        1
+      );
+      setStats((prev) => ({
+        activeCount: combinedActive,
+        totalVisits: totalVisits ?? prev.totalVisits,
+      }));
     };
 
-    // Send heartbeat ping to server
+    // -------------------------------------------------------------
+    // LAYER 1: Global P2P WebRTC / MQTT Presence Mesh (Cross-Device)
+    // -------------------------------------------------------------
+    let p2pRoom: ReturnType<typeof joinRoom> | null = null;
+    try {
+      p2pRoom = joinRoom(
+        { appId: 'shyamali-tagore-music-live-mesh' },
+        'active-listeners-presence'
+      );
+
+      const refreshPeerCount = () => {
+        if (!p2pRoom || !isMounted) return;
+        try {
+          const peers = p2pRoom.getPeers();
+          const count = Object.keys(peers).length + 1; // peers + self
+          peerCountRef.current = count;
+          updateMergedStats();
+        } catch {
+          // Ignore peer access errors
+        }
+      };
+
+      p2pRoom.onPeerJoin = () => {
+        refreshPeerCount();
+      };
+
+      p2pRoom.onPeerLeave = () => {
+        refreshPeerCount();
+      };
+
+      // Initial check after connecting
+      setTimeout(refreshPeerCount, 1200);
+      setTimeout(refreshPeerCount, 3000);
+    } catch {
+      // P2P fallback handled by Server & BroadcastChannel layers
+    }
+
+    // -------------------------------------------------------------
+    // LAYER 2: Same-Device Multi-Tab BroadcastChannel Synchronization
+    // -------------------------------------------------------------
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        bc = new BroadcastChannel('shyamali_tab_sync');
+        const knownTabs = new Map<string, number>();
+        knownTabs.set(sessionId, Date.now());
+
+        const pingTabs = () => {
+          if (!bc || !isMounted) return;
+          try {
+            bc.postMessage({ type: 'tab_ping', id: sessionId, time: Date.now() });
+            const now = Date.now();
+            for (const [id, t] of knownTabs.entries()) {
+              if (now - t > 10000) knownTabs.delete(id);
+            }
+            localTabsRef.current = Math.max(1, knownTabs.size);
+            updateMergedStats();
+          } catch {
+            // Ignore broadcast channel post errors
+          }
+        };
+
+        bc.onmessage = (ev) => {
+          if (ev.data?.type === 'tab_ping' && ev.data.id) {
+            knownTabs.set(ev.data.id, ev.data.time || Date.now());
+            localTabsRef.current = Math.max(1, knownTabs.size);
+            updateMergedStats();
+          }
+        };
+
+        pingTabs();
+      }
+    } catch {
+      // Ignore broadcast channel unsupported errors
+    }
+
+    // -------------------------------------------------------------
+    // LAYER 3: Backend REST Heartbeat & Server-Sent Events (SSE)
+    // -------------------------------------------------------------
     const sendPing = async () => {
       try {
-        const res = await fetch('/api/visitors/ping', {
+        const cacheBuster = Date.now();
+        const res = await fetch(`/api/visitors/ping?sessionId=${encodeURIComponent(sessionId)}&_t=${cacheBuster}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
         });
         if (res.ok) {
           const data = await res.json();
-          applyStats(data);
+          if (typeof data.activeCount === 'number') {
+            serverCountRef.current = Math.max(1, data.activeCount);
+            updateMergedStats(data.totalVisits);
+          }
         }
       } catch {
         // Fallback to GET count if POST ping fails
         try {
-          const res = await fetch('/api/visitors/count');
+          const cacheBuster = Date.now();
+          const res = await fetch(`/api/visitors/count?_t=${cacheBuster}`);
           if (res.ok) {
             const data = await res.json();
-            applyStats(data);
+            if (typeof data.activeCount === 'number') {
+              serverCountRef.current = Math.max(1, data.activeCount);
+              updateMergedStats(data.totalVisits);
+            }
           }
         } catch {
-          // Ignore offline errors
+          // Ignore network errors
         }
       }
     };
 
-    // Initial ping
+    // Initial ping & recurring pulse
     sendPing();
+    const pingInterval = setInterval(sendPing, 3000);
 
-    // Pulse ping every 4 seconds to maintain active session heartbeat
-    const pingInterval = setInterval(sendPing, 4000);
-
-    // SSE connection for instant pushed real-time updates
+    // SSE Stream connection
     let eventSource: EventSource | null = null;
     const connectSSE = () => {
       try {
@@ -96,7 +188,10 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
         eventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            applyStats(data);
+            if (typeof data.activeCount === 'number') {
+              serverCountRef.current = Math.max(1, data.activeCount);
+              updateMergedStats(data.totalVisits);
+            }
           } catch {
             // Ignore parse errors on heartbeat comments
           }
@@ -106,21 +201,29 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
             eventSource.close();
             eventSource = null;
           }
-          // Polling will seamlessly maintain updates while SSE is reconnecting
         };
       } catch {
-        // SSE not supported, polling interval handles updates
+        // SSE not supported
       }
     };
 
     connectSSE();
 
-    // Immediate ping & reconnect when tab becomes active/visible again
+    // Reconnect & ping when browser tab becomes active
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         sendPing();
         if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
           connectSSE();
+        }
+        if (p2pRoom) {
+          try {
+            const peers = p2pRoom.getPeers();
+            peerCountRef.current = Object.keys(peers).length + 1;
+            updateMergedStats();
+          } catch {
+            // Ignore
+          }
         }
       }
     };
@@ -130,12 +233,18 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
     // Leave notify on page unload
     const handleUnload = () => {
       try {
+        if (p2pRoom) {
+          p2pRoom.leave();
+        }
+        if (bc) {
+          bc.close();
+        }
         const payload = JSON.stringify({ sessionId });
         if (navigator.sendBeacon) {
           const blob = new Blob([payload], { type: 'application/json' });
-          navigator.sendBeacon('/api/visitors/leave', blob);
+          navigator.sendBeacon(`/api/visitors/leave?sessionId=${encodeURIComponent(sessionId)}`, blob);
         } else {
-          fetch('/api/visitors/leave', {
+          fetch(`/api/visitors/leave?sessionId=${encodeURIComponent(sessionId)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: payload,
@@ -155,6 +264,20 @@ export const LiveVisitorsCard: React.FC = React.memo(() => {
       clearInterval(pingInterval);
       if (eventSource) {
         eventSource.close();
+      }
+      if (p2pRoom) {
+        try {
+          p2pRoom.leave();
+        } catch {
+          // Ignore
+        }
+      }
+      if (bc) {
+        try {
+          bc.close();
+        } catch {
+          // Ignore
+        }
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
