@@ -64,19 +64,19 @@ export const IndianTimeCard: React.FC = React.memo(() => {
   }, []);
 
   return (
-    <div className="liquid-glass-pill rounded-xl sm:rounded-2xl px-2.5 sm:px-3 h-8 sm:h-9 text-white shadow-xl flex items-center gap-1.5 sm:gap-2 transition-all select-none group shrink-0">
-      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-amber-300 shadow-inner group-hover:scale-105 transition-transform">
-        <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
+    <div className="liquid-glass-pill rounded-xl sm:rounded-2xl px-1.5 xs:px-2.5 sm:px-3 h-7 sm:h-9 text-white shadow-xl flex items-center gap-1 xs:gap-1.5 sm:gap-2 transition-all select-none group shrink-0">
+      <div className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-amber-300 shadow-inner group-hover:scale-105 transition-transform">
+        <Clock className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
       </div>
 
       <div className="flex flex-col justify-center min-w-0 leading-none">
-        <div className="text-[11px] sm:text-xs font-bold tracking-tight text-white font-mono leading-tight">
+        <div className="text-[9.5px] xs:text-[11px] sm:text-xs font-bold tracking-tight text-white font-mono leading-tight whitespace-nowrap">
           {timeState.timeString || '00:00:00 AM'}
         </div>
 
-        <div className="text-[8.5px] sm:text-[10px] text-white/75 flex items-center gap-1 mt-0.5 font-medium leading-none">
-          <Calendar className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white/60 shrink-0 hidden xs:inline" />
-          <span className="truncate max-w-[95px] sm:max-w-none">{timeState.dayName}, {timeState.dateMonth}</span>
+        <div className="text-[7.5px] xs:text-[8.5px] sm:text-[10px] text-white/75 flex items-center gap-0.5 xs:gap-1 mt-0.5 font-medium leading-none whitespace-nowrap">
+          <Calendar className="w-2 h-2 text-white/60 shrink-0 hidden xs:inline" />
+          <span className="truncate max-w-[70px] xs:max-w-[95px] sm:max-w-none">{timeState.dayName}, {timeState.dateMonth}</span>
         </div>
       </div>
     </div>

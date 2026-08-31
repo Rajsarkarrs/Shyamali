@@ -10,7 +10,7 @@ declare global {
 
 export interface SeekRequest {
   time: number;
-  id: number; // Unique trigger token
+  id: number;
 }
 
 interface YouTubeAudioPlayerProps {
@@ -39,24 +39,23 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const audioFallbackRef = useRef<HTMLAudioElement | null>(null);
-  const isApiLoadedRef = useRef(false);
-  const isPlayerReadyRef = useRef(false);
-  const isUsingFallbackRef = useRef(false);
+  const isPlayerReadyRef = useRef<boolean>(false);
+  const isUsingFallbackRef = useRef<boolean>(false);
   const timerRef = useRef<any>(null);
   
-  // Stable track ID reference to avoid spurious reloads
-  const loadedTrackIdRef = useRef<string>('');
-  const lastReportedTimeRef = useRef<number>(0);
-  const lastHandledSeekIdRef = useRef<number | null>(null);
+  // Track tracking
+  const currentTrackRef = useRef<Track>(track);
+  currentTrackRef.current = track;
 
-  // Keep latest props in refs to avoid rebuilding effects on volume/callback updates
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
+  const currentTrackIdRef = useRef<string>(track.id);
+  const pendingTrackIdRef = useRef<string>(track.id);
+  const pendingPlayRef = useRef<boolean>(isPlaying);
+  pendingPlayRef.current = isPlaying;
 
-  const volumeRef = useRef(volume);
+  const volumeRef = useRef<number>(volume);
   volumeRef.current = volume;
 
-  const isMutedRef = useRef(isMuted);
+  const isMutedRef = useRef<boolean>(isMuted);
   isMutedRef.current = isMuted;
 
   const onTrackEndRef = useRef(onTrackEnd);
@@ -71,34 +70,46 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
 
-  // Time tracking loop for YouTube Player
+  const lastReportedTimeRef = useRef<number>(0);
+  const lastHandledSeekIdRef = useRef<number | null>(null);
+
+  // Time loop to report playback progress
   const startTimeLoop = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
+      // 1. Fallback Audio check
       if (isUsingFallbackRef.current && audioFallbackRef.current) {
         const cur = audioFallbackRef.current.currentTime || 0;
-        const dur = audioFallbackRef.current.duration || track.durationSeconds || 180;
-        if (Math.abs(cur - lastReportedTimeRef.current) >= 0.25) {
+        const dur = audioFallbackRef.current.duration || currentTrackRef.current.durationSeconds || 180;
+        if (Math.abs(cur - lastReportedTimeRef.current) >= 0.2) {
           lastReportedTimeRef.current = cur;
           onTimeUpdateRef.current(cur, dur);
         }
         return;
       }
 
-      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+      // 2. YouTube Player check
+      if (playerRef.current && isPlayerReadyRef.current && typeof playerRef.current.getCurrentTime === 'function') {
         try {
+          const state = typeof playerRef.current.getPlayerState === 'function' ? playerRef.current.getPlayerState() : -1;
           const currentTime = playerRef.current.getCurrentTime() || 0;
-          const duration = playerRef.current.getDuration() || track.durationSeconds || 180;
-          if (duration > 0 && Math.abs(currentTime - lastReportedTimeRef.current) >= 0.25) {
+          const duration = playerRef.current.getDuration() || currentTrackRef.current.durationSeconds || 180;
+
+          if (duration > 0 && Math.abs(currentTime - lastReportedTimeRef.current) >= 0.2) {
             lastReportedTimeRef.current = currentTime;
             onTimeUpdateRef.current(currentTime, duration);
+          }
+
+          // If playing state is active, ensure loop keeps running
+          if (state === 1 && !pendingPlayRef.current) {
+            // Keep in sync
           }
         } catch {
           // Ignore transient read errors
         }
       }
-    }, 400);
-  }, [track.durationSeconds]);
+    }, 250);
+  }, []);
 
   const stopTimeLoop = useCallback(() => {
     if (timerRef.current) {
@@ -107,24 +118,28 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     }
   }, []);
 
-  // Activate HTML5 audio fallback if YouTube has embed restrictions or network blocks
+  // HTML5 audio fallback if YouTube has embed restrictions
   const activateAudioFallback = useCallback(() => {
     isUsingFallbackRef.current = true;
     if (!audioFallbackRef.current) {
       audioFallbackRef.current = new Audio();
     }
     const audio = audioFallbackRef.current;
-    if (track.audioUrl) {
-      audio.src = track.audioUrl;
+    if (currentTrackRef.current.audioUrl) {
+      audio.src = currentTrackRef.current.audioUrl;
     } else {
-      audio.src = 'https://actions.google.com/sounds/v1/ambiences/outdoor_festival_crowd.ogg';
+      // Pleasant calm meditative ambient fallback stream
+      audio.src = 'https://actions.google.com/sounds/v1/ambiences/wind_chimes.ogg';
     }
     audio.volume = isMutedRef.current ? 0 : volumeRef.current / 100;
     audio.muted = isMutedRef.current;
 
-    if (isPlayingRef.current) {
-      audio.play().catch((e) => console.warn('Audio fallback play prevented:', e));
-      startTimeLoop();
+    if (pendingPlayRef.current) {
+      audio.play().then(() => {
+        startTimeLoop();
+      }).catch((e) => {
+        console.warn('Audio fallback autoplay prevented:', e);
+      });
     }
 
     audio.onended = () => {
@@ -134,31 +149,56 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
 
     audio.ontimeupdate = () => {
       const cur = audio.currentTime || 0;
-      const dur = audio.duration || track.durationSeconds || 180;
+      const dur = audio.duration || currentTrackRef.current.durationSeconds || 180;
       onTimeUpdateRef.current(cur, dur);
     };
-  }, [track.audioUrl, track.durationSeconds, startTimeLoop, stopTimeLoop]);
+  }, [startTimeLoop, stopTimeLoop]);
 
-  // Initialize YouTube IFrame API Once
+  // Setup OS / Browser Media Session integration
   useEffect(() => {
-    const initPlayer = () => {
-      if (!window.YT || !window.YT.Player || !containerRef.current) return;
+    if ('mediaSession' in navigator && track) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title,
+          artist: track.artist || 'Rabindra Sangeet',
+          album: 'Shyamali রবীন্দ্র সঙ্গীত',
+          artwork: [
+            {
+              src: track.thumbnail || `https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`,
+              sizes: '512x512',
+              type: 'image/jpeg',
+            },
+          ],
+        });
 
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      } catch (err) {
+        console.warn('MediaSession metadata error:', err);
+      }
+    }
+  }, [track, isPlaying]);
+
+  // Initialize YouTube IFrame API ONCE on mount
+  useEffect(() => {
+    let isUnmounted = false;
+
+    const createPlayerInstance = () => {
+      if (isUnmounted || !window.YT || !window.YT.Player || !containerRef.current) return;
+
+      // Ensure clean mount node
       const mountNode = document.createElement('div');
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(mountNode);
 
-      const initialVideoId = (track.id && track.id.length === 11 && !/[^a-zA-Z0-9_-]/.test(track.id))
-        ? track.id
-        : 'q_Cj3zQ1LIA';
+      const targetTrackId = pendingTrackIdRef.current || 'rZwJie68mo0';
 
       try {
         playerRef.current = new window.YT.Player(mountNode, {
-          height: '200',
-          width: '320',
-          videoId: initialVideoId,
+          height: '180',
+          width: '240',
+          videoId: targetTrackId,
           playerVars: {
-            autoplay: isPlayingRef.current ? 1 : 0,
+            autoplay: pendingPlayRef.current ? 1 : 0,
             controls: 0,
             disablekb: 1,
             fs: 0,
@@ -166,13 +206,14 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
             playsinline: 1,
             rel: 0,
             enablejsapi: 1,
-            origin: window.location.origin,
           },
           events: {
             onReady: (event: any) => {
+              if (isUnmounted) return;
               isPlayerReadyRef.current = true;
-              loadedTrackIdRef.current = track.id;
-              
+              currentTrackIdRef.current = targetTrackId;
+
+              // Apply current volume
               const currentVol = isMutedRef.current ? 0 : volumeRef.current;
               if (typeof event.target.setVolume === 'function') {
                 event.target.setVolume(currentVol);
@@ -183,15 +224,21 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
                 event.target.unMute();
               }
 
-              if (isPlayingRef.current) {
-                event.target.playVideo();
-                startTimeLoop();
+              // If user requested play before or while player was initializing
+              if (pendingPlayRef.current) {
+                try {
+                  event.target.playVideo();
+                  startTimeLoop();
+                } catch (e) {
+                  console.warn('playVideo failed onReady:', e);
+                }
               }
 
               if (onPlayerReadyRef.current) onPlayerReadyRef.current();
             },
             onStateChange: (event: any) => {
-              // YT.PlayerState: ENDED (0), PLAYING (1), PAUSED (2), BUFFERING (3)
+              if (isUnmounted) return;
+              // YT.PlayerState: UNSTARTED (-1), ENDED (0), PLAYING (1), PAUSED (2), BUFFERING (3), CUED (5)
               if (event.data === 0) {
                 stopTimeLoop();
                 onTrackEndRef.current();
@@ -203,36 +250,56 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
               }
             },
             onError: (event: any) => {
+              if (isUnmounted) return;
               const errorCode = typeof event === 'object' && event !== null && 'data' in event ? event.data : event;
-              console.warn('YouTube Audio Player embed error:', errorCode, '- activating audio fallback for track:', track.title);
+              console.warn('YouTube Audio Player embed error code:', errorCode, 'for track:', currentTrackRef.current.title);
+              
               if (onErrorRef.current) onErrorRef.current(errorCode);
-              activateAudioFallback();
+              
+              // Error 100 (not found), 101/150 (not allowed to embed): auto advance or fallback
+              if (errorCode === 101 || errorCode === 150 || errorCode === 100 || errorCode === 2) {
+                // If this specific YouTube video cannot be embedded, smoothly skip to next track after slight delay
+                console.info('Auto-advancing past restricted track...');
+                setTimeout(() => {
+                  if (!isUnmounted) {
+                    onTrackEndRef.current();
+                  }
+                }, 800);
+              } else {
+                activateAudioFallback();
+              }
             },
           },
         });
       } catch (err) {
-        console.warn('YouTube Player initialization error:', err);
+        console.warn('YouTube Player initialization exception:', err);
         activateAudioFallback();
       }
     };
 
+    // Load YouTube API script if not already in window
     if (window.YT && window.YT.Player) {
-      initPlayer();
+      createPlayerInstance();
     } else {
-      if (!isApiLoadedRef.current) {
-        isApiLoadedRef.current = true;
+      const existingTag = document.getElementById('youtube-iframe-api-script');
+      if (!existingTag) {
         const tag = document.createElement('script');
+        tag.id = 'youtube-iframe-api-script';
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-        window.onYouTubeIframeAPIReady = () => {
-          initPlayer();
-        };
+        firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
       }
+
+      // Chain onto existing callback if any
+      const prevCallback = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof prevCallback === 'function') prevCallback();
+        createPlayerInstance();
+      };
     }
 
     return () => {
+      isUnmounted = true;
       stopTimeLoop();
       if (audioFallbackRef.current) {
         audioFallbackRef.current.pause();
@@ -246,14 +313,16 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
         }
       }
     };
-  }, [activateAudioFallback, startTimeLoop, stopTimeLoop]);
+  }, []); // Run ONLY once on mount!
 
-  // Handle Track change strictly when track.id changes
+  // Handle Track ID changes dynamically without destroying player
   useEffect(() => {
-    if (loadedTrackIdRef.current === track.id) {
-      return; // Same track, do not reload or restart!
+    pendingTrackIdRef.current = track.id;
+
+    if (currentTrackIdRef.current === track.id) {
+      return;
     }
-    loadedTrackIdRef.current = track.id;
+    currentTrackIdRef.current = track.id;
     isUsingFallbackRef.current = false;
     lastReportedTimeRef.current = 0;
 
@@ -263,32 +332,37 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
 
     const targetVideoId = (track.id && track.id.length === 11 && !/[^a-zA-Z0-9_-]/.test(track.id))
       ? track.id
-      : 'q_Cj3zQ1LIA';
+      : 'rZwJie68mo0';
 
-    if (playerRef.current && typeof playerRef.current.loadVideoById === 'function' && isPlayerReadyRef.current) {
+    if (playerRef.current && isPlayerReadyRef.current) {
       try {
         if (isPlaying) {
-          playerRef.current.loadVideoById({
-            videoId: targetVideoId,
-            startSeconds: 0,
-          });
-          startTimeLoop();
+          if (typeof playerRef.current.loadVideoById === 'function') {
+            playerRef.current.loadVideoById({
+              videoId: targetVideoId,
+              startSeconds: 0,
+            });
+            startTimeLoop();
+          }
         } else {
-          playerRef.current.cueVideoById({
-            videoId: targetVideoId,
-            startSeconds: 0,
-          });
+          if (typeof playerRef.current.cueVideoById === 'function') {
+            playerRef.current.cueVideoById({
+              videoId: targetVideoId,
+              startSeconds: 0,
+            });
+          }
         }
-      } catch {
+      } catch (err) {
+        console.warn('Error loading video by ID:', err);
         activateAudioFallback();
       }
-    } else if (isPlaying) {
-      activateAudioFallback();
     }
   }, [track.id, isPlaying, activateAudioFallback, startTimeLoop]);
 
-  // Handle Play / Pause changes
+  // Handle Play / Pause state changes
   useEffect(() => {
+    pendingPlayRef.current = isPlaying;
+
     if (isUsingFallbackRef.current && audioFallbackRef.current) {
       if (isPlaying) {
         audioFallbackRef.current.play().catch(() => {});
@@ -319,7 +393,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     }
   }, [isPlaying, activateAudioFallback, startTimeLoop, stopTimeLoop]);
 
-  // Handle Seeking when seekRequest is received
+  // Handle Timeline Seeking
   useEffect(() => {
     if (!seekRequest || seekRequest.id === lastHandledSeekIdRef.current) {
       return;
@@ -349,7 +423,7 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
     }
   }, [seekRequest]);
 
-  // Handle Volume and Mute without touching playback position
+  // Handle Volume and Mute
   useEffect(() => {
     if (audioFallbackRef.current) {
       audioFallbackRef.current.volume = isMuted ? 0 : volume / 100;
@@ -373,12 +447,16 @@ export const YouTubeAudioPlayer: React.FC<YouTubeAudioPlayerProps> = React.memo(
   }, [volume, isMuted]);
 
   return (
-    /* Invisible active container that prevents browser background tab throttling */
+    /*
+      Active in-viewport container with zero opacity & pointer-events-none.
+      Crucial: Kept inside active viewport bounds to prevent Chrome & Safari background iframe throttling.
+    */
     <div
       aria-hidden="true"
-      className="fixed -bottom-[600px] -right-[600px] w-80 h-48 pointer-events-none opacity-[0.001] z-0 overflow-hidden"
+      className="fixed bottom-0 right-0 w-[200px] h-[150px] pointer-events-none opacity-0 -z-50 overflow-hidden"
     >
       <div ref={containerRef} id="youtube-hidden-audio-player" />
     </div>
   );
 });
+

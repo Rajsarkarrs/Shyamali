@@ -151,13 +151,32 @@ export default function App() {
     }));
   }, []);
 
-  // Global Keyboard Event Listeners for Media Control Shortcuts:
-  // - Space: Play / Pause
-  // - ArrowRight: Next Track
-  // - ArrowLeft: Previous Track
-  // - ArrowUp: Increase Volume (+5%)
-  // - ArrowDown: Decrease Volume (-5%)
+  // Global Keyboard & MediaSession Action Handlers
   useEffect(() => {
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler('play', () => {
+          setPlayerState((prev) => ({ ...prev, isPlaying: true }));
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          setPlayerState((prev) => ({ ...prev, isPlaying: false }));
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          handlePrevTrack();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          handleNextTrack();
+        });
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+          if (details.seekTime !== undefined) {
+            handleSeek(details.seekTime);
+          }
+        });
+      } catch (err) {
+        console.warn('Error setting MediaSession handlers:', err);
+      }
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Avoid intercepting keystrokes when typing in inputs, textareas, or content-editable elements
       const target = e.target as HTMLElement | null;
@@ -206,10 +225,10 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleTogglePlay, handleNextTrack, handlePrevTrack]);
+  }, [handleTogglePlay, handleNextTrack, handlePrevTrack, handleSeek]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between p-3 sm:p-6 md:p-8 font-sans overflow-x-hidden antialiased select-none text-white">
+    <div className="relative min-h-screen w-full flex flex-col justify-between p-2 xs:p-3 sm:p-6 md:p-8 font-sans overflow-x-hidden antialiased select-none text-white">
       {/* Dynamic Background Video (Idle state before play vs Playlist background) */}
       <BackgroundVideo
         timeOfDay={effectiveTimeOfDay}
@@ -228,8 +247,8 @@ export default function App() {
         onTimeUpdate={handleTimeUpdate}
       />
 
-      {/* TOP HEADER NAVIGATION ROW */}
-      <header className="w-full flex items-center justify-between gap-1.5 sm:gap-4 z-20">
+      {/* TOP HEADER NAVIGATION ROW - Single Row Across Mobile, Tablet and Desktop */}
+      <header className="w-full flex flex-nowrap items-center justify-between gap-1 xs:gap-1.5 sm:gap-4 z-20 overflow-x-hidden">
         {/* Top Left: Indian Time Glass Card */}
         <div className="flex justify-start shrink-0">
           <IndianTimeCard />
@@ -241,7 +260,7 @@ export default function App() {
         </div>
 
         {/* Top Right: Time Mode Switcher & Round Glass Iti Button */}
-        <div className="flex items-center justify-end gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center justify-end gap-1 xs:gap-1.5 sm:gap-3 shrink-0">
           <TimeModeToggle
             mode={mode}
             effectiveTimeOfDay={effectiveTimeOfDay}
@@ -251,7 +270,7 @@ export default function App() {
           <button
             id="iti-glass-trigger-btn"
             onClick={() => setIsItiModalOpen(true)}
-            className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl sm:rounded-2xl liquid-glass-pill flex items-center justify-center text-yellow-300 font-bengali-handwritten text-sm sm:text-lg transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
+            className="h-7 sm:h-9 px-2 xs:px-3 sm:px-4 rounded-xl sm:rounded-2xl liquid-glass-pill flex items-center justify-center text-yellow-300 font-bengali-handwritten text-xs xs:text-sm sm:text-lg transition-all duration-300 active:scale-95 group cursor-pointer shrink-0"
             title="ইতি - Credits & Notes"
             aria-label="ইতি"
           >

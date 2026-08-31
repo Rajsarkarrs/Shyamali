@@ -98,7 +98,10 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
   const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
     setScrubValue(val);
-  }, []);
+    if (!isScrubbing) {
+      onSeek(val);
+    }
+  }, [isScrubbing, onSeek]);
 
   const handleSliderPointerDown = useCallback(() => {
     setIsScrubbing(true);
@@ -120,13 +123,13 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
   return (
     <div className="relative w-full max-w-2xl mx-auto flex flex-col items-center select-none">
       {/* TOP FLOATING CATEGORY SELECTOR BUTTONS */}
-      <div className="flex items-center gap-2 mb-2.5 z-10 relative">
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-2.5 z-10 relative max-w-full flex-wrap px-1">
         {/* Playlist Category Selector Pill */}
         <button
           id="playlist-category-btn"
           onClick={() => setIsPlaylistMenuOpen((prev) => !prev)}
           title="Browse All Playlist Categories"
-          className="liquid-glass-pill rounded-xl sm:rounded-2xl px-3 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-100 flex items-center gap-1.5 active:scale-95 group"
+          className="liquid-glass-pill rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-stone-100 flex items-center gap-1.5 active:scale-95 group shrink-0"
         >
           <ListFilter className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
           <span>Playlist</span>
@@ -142,9 +145,9 @@ export const MusicPlayerCard: React.FC<MusicPlayerCardProps> = React.memo(({
           id="selected-playlist-songs-btn"
           onClick={() => setIsSongModalOpen(true)}
           title="Select Songs from this Playlist"
-          className="liquid-glass-pill rounded-xl sm:rounded-2xl px-3 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-200 flex items-center gap-1.5 active:scale-95 group"
+          className="liquid-glass-pill rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-200 flex items-center gap-1.5 active:scale-95 group shrink-0 max-w-[calc(100vw-140px)] sm:max-w-none"
         >
-          <span className="truncate max-w-[130px] sm:max-w-[220px]">
+          <span className="truncate max-w-[120px] xs:max-w-[180px] sm:max-w-[240px]">
             {currentCategory.nameEnglish} ({currentCategory.nameBengali})
           </span>
           <ChevronDown className="w-3 h-3 text-stone-400 group-hover:translate-y-0.5 transition-transform shrink-0" />
