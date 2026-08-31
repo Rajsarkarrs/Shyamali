@@ -5,8 +5,10 @@ import { createServer as createViteServer } from "vite";
 const app = express();
 const PORT = 3000;
 
-// Set up JSON body parser
+// Set up body parsers (JSON, urlencoded, and text for sendBeacon)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text({ type: ['text/*', 'application/json'] }));
 
 // Real-time SSE & Ping Live Visitor Tracking
 interface SSEClient {
@@ -19,12 +21,13 @@ const visitedSessionIds = new Set<string>();
 let sseClients: SSEClient[] = [];
 let totalVisits = 108; // Starting base visit count
 
+const SESSION_TIMEOUT = 30000; // 30 seconds timeout for inactive sessions
+
 function cleanStaleSessions(): boolean {
   const now = Date.now();
-  const timeout = 10000; // 10 seconds timeout for inactive sessions
   let removed = false;
   for (const [sessionId, lastSeen] of activeSessions.entries()) {
-    if (now - lastSeen > timeout) {
+    if (now - lastSeen > SESSION_TIMEOUT) {
       activeSessions.delete(sessionId);
       removed = true;
     }
@@ -47,6 +50,9 @@ function broadcastVisitorStats() {
   sseClients = sseClients.filter((client) => {
     try {
       client.res.write(`data: ${data}\n\n`);
+      if (typeof (client.res as any).flush === 'function') {
+        (client.res as any).flush();
+      }
       return true;
     } catch {
       return false;
@@ -54,17 +60,33 @@ function broadcastVisitorStats() {
   });
 }
 
+function extractSessionId(req: express.Request): string | null {
+  if (!req.body) return null;
+  if (typeof req.body === 'object' && req.body.sessionId) {
+    return String(req.body.sessionId);
+  }
+  if (typeof req.body === 'string') {
+    try {
+      const parsed = JSON.parse(req.body);
+      if (parsed && parsed.sessionId) return String(parsed.sessionId);
+    } catch {
+      if (req.body.startsWith('s_')) return req.body.trim();
+    }
+  }
+  return null;
+}
+
 // Periodically clean stale sessions and broadcast if count changed
 setInterval(() => {
   if (cleanStaleSessions()) {
     broadcastVisitorStats();
   }
-}, 4000);
+}, 5000);
 
 // Ping endpoint for active session pulse
 app.post("/api/visitors/ping", (req, res) => {
-  const { sessionId } = req.body || {};
-  if (sessionId && typeof sessionId === "string") {
+  const sessionId = extractSessionId(req);
+  if (sessionId) {
     if (!visitedSessionIds.has(sessionId)) {
       visitedSessionIds.add(sessionId);
       totalVisits++;
@@ -73,22 +95,25 @@ app.post("/api/visitors/ping", (req, res) => {
   }
   const stats = getActiveStats();
   broadcastVisitorStats();
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json(stats);
 });
 
 // Leave endpoint when user closes tab
 app.post("/api/visitors/leave", (req, res) => {
-  const { sessionId } = req.body || {};
-  if (sessionId && typeof sessionId === "string") {
+  const sessionId = extractSessionId(req);
+  if (sessionId) {
     activeSessions.delete(sessionId);
   }
   const stats = getActiveStats();
   broadcastVisitorStats();
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({ ok: true });
 });
 
 // REST endpoint for initial / fallback count
 app.get("/api/visitors/count", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json(getActiveStats());
 });
 
@@ -99,10 +124,15 @@ app.get("/api/visitors/stream", (req, res) => {
   // Set SSE headers with no caching and disabled buffering
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache, no-transform",
+    "Cache-Control": "no-cache, no-transform, no-store",
     "Connection": "keep-alive",
     "X-Accel-Buffering": "no",
+    "Access-Control-Allow-Origin": "*",
   });
+
+  if (typeof (res as any).flushHeaders === "function") {
+    (res as any).flushHeaders();
+  }
 
   const client: SSEClient = { id: clientId, res };
   sseClients.push(client);
@@ -114,7 +144,10 @@ app.get("/api/visitors/stream", (req, res) => {
   // Heartbeat ping every 15s to keep connection alive across proxies
   const heartbeatInterval = setInterval(() => {
     try {
-      res.write(": heartbeat\n\n");
+      res.write(": keepalive\n\n");
+      if (typeof (res as any).flush === "function") {
+        (res as any).flush();
+      }
     } catch {
       clearInterval(heartbeatInterval);
     }
